@@ -30,7 +30,7 @@ confidence от 0 до 1.`},
     res.json(JSON.parse(cleaned));
   }catch(e){
     console.error(e);
-    res.status(500).json({error:"AI не смог обработать фото",detail:e.message});
+    res.status(500).json({error:e.message});
   }
 });
 app.get("/api/health",(req,res)=>res.json({ok:true}));
