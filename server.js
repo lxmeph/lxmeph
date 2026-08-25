@@ -74,13 +74,14 @@ app.post("/api/analyze", upload.single("photo"), async (req, res) => {
 
     let text = result.choices?.[0]?.message?.content || "";
 
-    text = text
-      .replace(/^```json\s*/i, "")
-      .replace(/^```\s*/i, "")
-      .replace(/```\s*$/i, "")
-      .trim();
+text = text.trim();
 
-    const data = JSON.parse(text);
+if (text.startsWith("```")) {
+  text = text.replace(/^```(?:json)?\s*/i, "");
+  text = text.replace(/\s*```$/i, "");
+}
+
+const data = JSON.parse(text);
 
     res.json(data);
 
