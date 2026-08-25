@@ -20,18 +20,83 @@ const pool = new Pool({
   connectionString: process.env.DATABASE
 });
 
-/* Проверка подключения к PostgreSQL */
+/* =========================
+   СОЗДАНИЕ ТАБЛИЦ
+========================= */
 
-pool.query("SELECT NOW()")
-  .then(() => {
-    console.log("PostgreSQL connected");
-  })
-  .catch((error) => {
+async function initDatabase() {
+  try {
+
+    await pool.query(`
+      
+      CREATE TABLE IF NOT EXISTS profiles (
+        id SERIAL PRIMARY KEY,
+        age INTEGER,
+        sex VARCHAR(20),
+        start_weight NUMERIC(5,1),
+        current_weight NUMERIC(5,1),
+        target_weight NUMERIC(5,1),
+        height NUMERIC(5,1),
+        activity NUMERIC(5,3),
+        calorie_goal INTEGER,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS meals (
+        id SERIAL PRIMARY KEY,
+        profile_id INTEGER REFERENCES profiles(id) ON DELETE CASCADE,
+        meal_date DATE NOT NULL,
+        meal_time TIME,
+        name TEXT NOT NULL,
+        grams NUMERIC(7,1),
+        calories NUMERIC(8,1),
+        protein NUMERIC(7,1),
+        fat NUMERIC(7,1),
+        carbs NUMERIC(7,1),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS weight_history (
+        id SERIAL PRIMARY KEY,
+        profile_id INTEGER REFERENCES profiles(id) ON DELETE CASCADE,
+        weight_date DATE NOT NULL,
+        weight NUMERIC(5,1) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(profile_id, weight_date)
+      );
+
+      CREATE TABLE IF NOT EXISTS goals (
+        id SERIAL PRIMARY KEY,
+        profile_id INTEGER REFERENCES profiles(id) ON DELETE CASCADE,
+        target_weight NUMERIC(5,1),
+        calorie_goal INTEGER,
+        start_date DATE,
+        active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+    `);
+
+    console.log(
+      "PostgreSQL connected"
+    );
+
+    console.log(
+      "FoodLens database tables ready"
+    );
+
+  } catch (error) {
+
     console.error(
-      "PostgreSQL connection error:",
+      "Database initialization error:",
       error
     );
-  });
+
+  }
+}
+
+initDatabase();
 
 /* =========================
    ЗАГРУЗКА ФОТО
@@ -39,6 +104,7 @@ pool.query("SELECT NOW()")
 
 const upload = multer({
   storage: multer.memoryStorage(),
+
   limits: {
     fileSize: 8 * 1024 * 1024
   }
@@ -50,49 +116,58 @@ app.use(express.json());
    САЙТ
 ========================= */
 
-// Раздаём файлы сайта
-app.use(express.static(__dirname));
+app.use(
+  express.static(__dirname)
+);
 
-// Главная страница
 app.get("/", (req, res) => {
+
   res.sendFile(
-    path.join(__dirname, "index.html")
+    path.join(
+      __dirname,
+      "index.html"
+    )
   );
+
 });
 
 /* =========================
    ПРОВЕРКА DATABASE
 ========================= */
 
-app.get("/api/db-test", async (req, res) => {
+app.get(
+  "/api/db-test",
+  async (req, res) => {
 
-  try {
+    try {
 
-    const result = await pool.query(
-      "SELECT NOW() AS time"
-    );
+      const result =
+        await pool.query(
+          "SELECT NOW() AS time"
+        );
 
-    res.json({
-      ok: true,
-      database: "connected",
-      time: result.rows[0].time
-    });
+      res.json({
+        ok: true,
+        database: "connected",
+        time: result.rows[0].time
+      });
 
-  } catch (error) {
+    } catch (error) {
 
-    console.error(
-      "Database test error:",
-      error
-    );
+      console.error(
+        "Database test error:",
+        error
+      );
 
-    res.status(500).json({
-      ok: false,
-      error: error.message
-    });
+      res.status(500).json({
+        ok: false,
+        error: error.message
+      });
+
+    }
 
   }
-
-});
+);
 
 /* =========================
    AI-АНАЛИЗ ФОТО
@@ -117,13 +192,16 @@ app.post(
       if (!req.file) {
 
         return res.status(400).json({
-          error: "Фото не загружено"
+          error:
+            "Фото не загружено"
         });
 
       }
 
       const image =
-        req.file.buffer.toString("base64");
+        req.file.buffer.toString(
+          "base64"
+        );
 
       const mime =
         req.file.mimetype ||
@@ -176,7 +254,8 @@ confidence должен быть числом от 0 до 1.
 
       const requestBody = {
 
-        model: "openrouter/free",
+        model:
+          "openrouter/free",
 
         messages: [
 
@@ -200,32 +279,41 @@ confidence должен быть числом от 0 до 1.
                     ";base64," +
                     image
                 }
+
               }
 
             ]
+
           }
 
         ]
+
       };
 
-      const response = await fetch(
-        "https://openrouter.ai/api/v1/chat/completions",
-        {
-          method: "POST",
+      const response =
+        await fetch(
+          "https://openrouter.ai/api/v1/chat/completions",
+          {
+            method: "POST",
 
-          headers: {
-            "Authorization":
-              "Bearer " +
-              process.env.OPENROUTER_API_KEY,
+            headers: {
 
-            "Content-Type":
-              "application/json"
-          },
+              "Authorization":
+                "Bearer " +
+                process.env.OPENROUTER_API_KEY,
 
-          body:
-            JSON.stringify(requestBody)
-        }
-      );
+              "Content-Type":
+                "application/json"
+
+            },
+
+            body:
+              JSON.stringify(
+                requestBody
+              )
+
+          }
+        );
 
       const result =
         await response.json();
@@ -235,9 +323,13 @@ confidence должен быть числом от 0 до 1.
         return res
           .status(response.status)
           .json({
+
             error:
-              result?.error?.message ||
+              result
+                ?.error
+                ?.message ||
               "Ошибка OpenRouter"
+
           });
 
       }
@@ -249,11 +341,14 @@ confidence должен быть числом от 0 до 1.
           ?.content ||
         "";
 
-      text = text.trim();
+      text =
+        text.trim();
 
-      /* Убираем markdown, если AI его всё-таки вернул */
+      /* Убираем markdown */
 
-      if (text.startsWith("```")) {
+      if (
+        text.startsWith("```")
+      ) {
 
         text =
           text.replace(
@@ -307,9 +402,11 @@ confidence должен быть числом от 0 до 1.
       );
 
       res.status(500).json({
+
         error:
           error.message ||
           "AI не смог обработать фото"
+
       });
 
     }
@@ -321,16 +418,19 @@ confidence должен быть числом от 0 до 1.
    ПРОВЕРКА СЕРВЕРА
 ========================= */
 
-app.get("/api/health", (req, res) => {
+app.get(
+  "/api/health",
+  (req, res) => {
 
-  res.json({
-    ok: true
-  });
+    res.json({
+      ok: true
+    });
 
-});
+  }
+);
 
 /* =========================
-   ЗАПУСК СЕРВЕРА
+   ЗАПУСК
 ========================= */
 
 const PORT =
