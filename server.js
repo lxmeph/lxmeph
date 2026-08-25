@@ -16,10 +16,6 @@ const __dirname = path.dirname(__filename);
    POSTGRESQL
 ========================= */
 
-if (!process.env.DATABASE) {
-  console.error("DATABASE не найден в Environment Variables");
-}
-
 const pool = new Pool({
   connectionString: process.env.DATABASE,
   ssl: {
@@ -28,94 +24,76 @@ const pool = new Pool({
 });
 
 /* =========================
-   СОЗДАНИЕ ТАБЛИЦ
+   UPLOAD
 ========================= */
 
-async function initDatabase() {
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS profiles (
-        id SERIAL PRIMARY KEY,
-        age INTEGER,
-        sex VARCHAR(20),
-        start_weight NUMERIC(6,2),
-        current_weight NUMERIC(6,2),
-        target_weight NUMERIC(6,2),
-        height NUMERIC(6,2),
-        activity NUMERIC(6,3),
-        calorie_goal INTEGER,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS meals (
-        id SERIAL PRIMARY KEY,
-        profile_id INTEGER REFERENCES profiles(id) ON DELETE CASCADE,
-        meal_date DATE NOT NULL,
-        name TEXT NOT NULL,
-        grams NUMERIC(8,2) DEFAULT 0,
-        calories NUMERIC(10,2) DEFAULT 0,
-        protein NUMERIC(10,2) DEFAULT 0,
-        fat NUMERIC(10,2) DEFAULT 0,
-        carbs NUMERIC(10,2) DEFAULT 0,
-        meal_time VARCHAR(10),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS weight_history (
-        id SERIAL PRIMARY KEY,
-        profile_id INTEGER REFERENCES profiles(id) ON DELETE CASCADE,
-        weight_date DATE NOT NULL,
-        weight NUMERIC(6,2) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-
-    await pool.query(`
-      CREATE INDEX IF NOT EXISTS meals_profile_date_idx
-      ON meals(profile_id, meal_date);
-    `);
-
-    await pool.query(`
-      CREATE INDEX IF NOT EXISTS weight_profile_date_idx
-      ON weight_history(profile_id, weight_date);
-    `);
-
-    console.log("PostgreSQL tables ready");
-
-  } catch (error) {
-    console.error("Database initialization error:", error);
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 8 * 1024 * 1024
   }
-}
-
-/* =========================
-   MIDDLEWARE
-========================= */
+});
 
 app.use(express.json());
 
-app.use(express.static(__dirname));
-
 /* =========================
-   ГЛАВНАЯ
+   DATABASE INIT
 ========================= */
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
+async function initDatabase() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS profiles (
+      id SERIAL PRIMARY KEY,
+      age INTEGER,
+      sex TEXT,
+      start_weight NUMERIC(6,2),
+      current_weight NUMERIC(6,2),
+      target_weight NUMERIC(6,2),
+      height NUMERIC(6,2),
+      activity NUMERIC(5,3),
+      calorie_goal INTEGER,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS meals (
+      id SERIAL PRIMARY KEY,
+      profile_id INTEGER REFERENCES profiles(id) ON DELETE CASCADE,
+      meal_date DATE NOT NULL,
+      name TEXT NOT NULL,
+      grams NUMERIC(8,2) DEFAULT 0,
+      calories NUMERIC(10,2) DEFAULT 0,
+      protein NUMERIC(10,2) DEFAULT 0,
+      fat NUMERIC(10,2) DEFAULT 0,
+      carbs NUMERIC(10,2) DEFAULT 0,
+      meal_time TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS weights (
+      id SERIAL PRIMARY KEY,
+      profile_id INTEGER REFERENCES profiles(id) ON DELETE CASCADE,
+      weight_date DATE NOT NULL,
+      weight NUMERIC(6,2) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(profile_id, weight_date)
+    );
+  `);
+
+  console.log("PostgreSQL tables ready");
+}
+
+initDatabase()
+  .then(() => {
+    console.log("PostgreSQL connected");
+  })
+  .catch((error) => {
+    console.error("PostgreSQL initialization error:", error);
+  });
 
 /* =========================
-   ПРОФИЛЬ
+   PROFILE
 ========================= */
-
-/*
-  Получить профиль.
-  Пока используем первый профиль пользователя.
-*/
 
 app.get("/api/profile", async (req, res) => {
   try {
@@ -133,22 +111,16 @@ app.get("/api/profile", async (req, res) => {
     res.json(result.rows[0]);
 
   } catch (error) {
-    console.error("Get profile error:", error);
+    console.error(error);
 
     res.status(500).json({
-      error: "Ошибка загрузки профиля"
+      error: "Не удалось загрузить профиль"
     });
   }
 });
 
-
-/*
-  Создать или обновить профиль.
-*/
-
 app.post("/api/profile", async (req, res) => {
   try {
-
     const {
       age,
       sex,
@@ -159,6 +131,18 @@ app.post("/api/profile", async (req, res) => {
       activity,
       calorieGoal
     } = req.body;
+
+    if (
+      !age ||
+      !startWeight ||
+      !targetWeight ||
+      !height ||
+      !activity
+    ) {
+      return res.status(400).json({
+        error: "Заполни все данные профиля"
+      });
+    }
 
     const existing = await pool.query(`
       SELECT id
@@ -172,7 +156,8 @@ app.post("/api/profile", async (req, res) => {
     if (existing.rows.length === 0) {
 
       result = await pool.query(`
-        INSERT INTO profiles (
+        INSERT INTO profiles
+        (
           age,
           sex,
           start_weight,
@@ -192,7 +177,7 @@ app.post("/api/profile", async (req, res) => {
         targetWeight,
         height,
         activity,
-        calorieGoal
+        calorieGoal || 0
       ]);
 
     } else {
@@ -215,198 +200,33 @@ app.post("/api/profile", async (req, res) => {
         age,
         sex,
         startWeight,
-        currentWeight,
+        currentWeight || startWeight,
         targetWeight,
         height,
         activity,
-        calorieGoal,
+        calorieGoal || 0,
         existing.rows[0].id
       ]);
-
     }
 
     res.json(result.rows[0]);
 
   } catch (error) {
-
-    console.error("Save profile error:", error);
+    console.error(error);
 
     res.status(500).json({
       error: "Ошибка сохранения профиля"
     });
-
   }
 });
 
 /* =========================
-   ВЕС
+   MEALS
 ========================= */
-
-/*
-  Получить историю веса.
-*/
-
-app.get("/api/weight", async (req, res) => {
-
-  try {
-
-    const profile = await pool.query(`
-      SELECT id
-      FROM profiles
-      ORDER BY id ASC
-      LIMIT 1
-    `);
-
-    if (profile.rows.length === 0) {
-      return res.json([]);
-    }
-
-    const result = await pool.query(`
-      SELECT
-        weight_date AS date,
-        weight
-      FROM weight_history
-      WHERE profile_id = $1
-      ORDER BY weight_date ASC
-    `, [
-      profile.rows[0].id
-    ]);
-
-    res.json(result.rows);
-
-  } catch (error) {
-
-    console.error("Get weight error:", error);
-
-    res.status(500).json({
-      error: "Ошибка загрузки веса"
-    });
-
-  }
-
-});
-
-
-/*
-  Сохранить вес.
-*/
-
-app.post("/api/weight", async (req, res) => {
-
-  try {
-
-    const {
-      date,
-      weight
-    } = req.body;
-
-    if (!date || !Number.isFinite(Number(weight))) {
-
-      return res.status(400).json({
-        error: "Некорректные данные веса"
-      });
-
-    }
-
-    const profile = await pool.query(`
-      SELECT id
-      FROM profiles
-      ORDER BY id ASC
-      LIMIT 1
-    `);
-
-    if (profile.rows.length === 0) {
-
-      return res.status(400).json({
-        error: "Сначала создай профиль"
-      });
-
-    }
-
-    const profileId = profile.rows[0].id;
-
-    const result = await pool.query(`
-      INSERT INTO weight_history (
-        profile_id,
-        weight_date,
-        weight
-      )
-      VALUES ($1,$2,$3)
-      ON CONFLICT DO NOTHING
-      RETURNING *
-    `, [
-      profileId,
-      date,
-      Number(weight)
-    ]);
-
-    /*
-      Если запись за этот день уже существует,
-      обновляем её.
-    */
-
-    if (result.rows.length === 0) {
-
-      const updated = await pool.query(`
-        UPDATE weight_history
-        SET weight = $1
-        WHERE profile_id = $2
-        AND weight_date = $3
-        RETURNING *
-      `, [
-        Number(weight),
-        profileId,
-        date
-      ]);
-
-      return res.json(updated.rows[0]);
-    }
-
-    /*
-      Обновляем текущий вес профиля.
-    */
-
-    await pool.query(`
-      UPDATE profiles
-      SET
-        current_weight = $1,
-        updated_at = CURRENT_TIMESTAMP
-      WHERE id = $2
-    `, [
-      Number(weight),
-      profileId
-    ]);
-
-    res.json(result.rows[0]);
-
-  } catch (error) {
-
-    console.error("Save weight error:", error);
-
-    res.status(500).json({
-      error: "Ошибка сохранения веса"
-    });
-
-  }
-
-});
-
-
-/* =========================
-   ЕДА
-========================= */
-
-/*
-  Получить блюда за конкретный день.
-*/
 
 app.get("/api/meals", async (req, res) => {
-
   try {
-
-    const date =
-      req.query.date ||
-      new Date().toISOString().slice(0, 10);
+    const date = req.query.date;
 
     const profile = await pool.query(`
       SELECT id
@@ -420,16 +240,7 @@ app.get("/api/meals", async (req, res) => {
     }
 
     const result = await pool.query(`
-      SELECT
-        id,
-        meal_date,
-        name,
-        grams,
-        calories,
-        protein,
-        fat,
-        carbs,
-        meal_time
+      SELECT *
       FROM meals
       WHERE profile_id = $1
       AND meal_date = $2
@@ -442,26 +253,16 @@ app.get("/api/meals", async (req, res) => {
     res.json(result.rows);
 
   } catch (error) {
-
-    console.error("Get meals error:", error);
+    console.error(error);
 
     res.status(500).json({
-      error: "Ошибка загрузки еды"
+      error: "Не удалось загрузить еду"
     });
-
   }
-
 });
 
-
-/*
-  Добавить блюдо.
-*/
-
 app.post("/api/meals", async (req, res) => {
-
   try {
-
     const {
       date,
       name,
@@ -473,14 +274,6 @@ app.post("/api/meals", async (req, res) => {
       time
     } = req.body;
 
-    if (!name) {
-
-      return res.status(400).json({
-        error: "Название блюда обязательно"
-      });
-
-    }
-
     const profile = await pool.query(`
       SELECT id
       FROM profiles
@@ -489,15 +282,14 @@ app.post("/api/meals", async (req, res) => {
     `);
 
     if (profile.rows.length === 0) {
-
       return res.status(400).json({
         error: "Сначала создай профиль"
       });
-
     }
 
     const result = await pool.query(`
-      INSERT INTO meals (
+      INSERT INTO meals
+      (
         profile_id,
         meal_date,
         name,
@@ -512,104 +304,174 @@ app.post("/api/meals", async (req, res) => {
       RETURNING *
     `, [
       profile.rows[0].id,
-      date || new Date().toISOString().slice(0, 10),
+      date,
       name,
-      Number(grams) || 0,
-      Number(calories) || 0,
-      Number(protein) || 0,
-      Number(fat) || 0,
-      Number(carbs) || 0,
+      grams || 0,
+      calories || 0,
+      protein || 0,
+      fat || 0,
+      carbs || 0,
       time || ""
     ]);
 
     res.json(result.rows[0]);
 
   } catch (error) {
-
-    console.error("Save meal error:", error);
+    console.error(error);
 
     res.status(500).json({
-      error: "Ошибка сохранения блюда"
+      error: "Ошибка сохранения еды"
     });
-
   }
-
 });
 
-
-/*
-  Удалить блюдо.
-*/
-
 app.delete("/api/meals/:id", async (req, res) => {
-
   try {
-
     await pool.query(`
       DELETE FROM meals
       WHERE id = $1
-    `, [
-      req.params.id
-    ]);
+    `, [req.params.id]);
 
     res.json({
       ok: true
     });
 
   } catch (error) {
-
-    console.error("Delete meal error:", error);
+    console.error(error);
 
     res.status(500).json({
-      error: "Ошибка удаления блюда"
+      error: "Ошибка удаления еды"
     });
-
   }
-
 });
-
 
 /* =========================
-   AI FOOD ANALYSIS
+   WEIGHTS
 ========================= */
 
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 8 * 1024 * 1024
+app.get("/api/weights", async (req, res) => {
+  try {
+    const profile = await pool.query(`
+      SELECT id
+      FROM profiles
+      ORDER BY id ASC
+      LIMIT 1
+    `);
+
+    if (profile.rows.length === 0) {
+      return res.json([]);
+    }
+
+    const result = await pool.query(`
+      SELECT *
+      FROM weights
+      WHERE profile_id = $1
+      ORDER BY weight_date ASC
+    `, [profile.rows[0].id]);
+
+    res.json(result.rows);
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      error: "Не удалось загрузить историю веса"
+    });
   }
 });
 
-app.post(
-  "/api/analyze",
-  upload.single("photo"),
-  async (req, res) => {
+app.post("/api/weights", async (req, res) => {
+  try {
+    const {
+      date,
+      weight
+    } = req.body;
 
-    try {
+    if (!date || !weight || Number(weight) <= 0) {
+      return res.status(400).json({
+        error: "Некорректный вес"
+      });
+    }
 
-      if (!process.env.OPENROUTER_API_KEY) {
+    const profile = await pool.query(`
+      SELECT id
+      FROM profiles
+      ORDER BY id ASC
+      LIMIT 1
+    `);
 
-        return res.status(500).json({
-          error: "OPENROUTER_API_KEY не найден в Render"
-        });
+    if (profile.rows.length === 0) {
+      return res.status(400).json({
+        error: "Сначала создай профиль"
+      });
+    }
 
-      }
+    const profileId = profile.rows[0].id;
 
-      if (!req.file) {
+    const result = await pool.query(`
+      INSERT INTO weights
+      (
+        profile_id,
+        weight_date,
+        weight
+      )
+      VALUES ($1,$2,$3)
+      ON CONFLICT (profile_id, weight_date)
+      DO UPDATE SET weight = EXCLUDED.weight
+      RETURNING *
+    `, [
+      profileId,
+      date,
+      Number(weight)
+    ]);
 
-        return res.status(400).json({
-          error: "Фото не загружено"
-        });
+    await pool.query(`
+      UPDATE profiles
+      SET current_weight = $1,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = $2
+    `, [
+      Number(weight),
+      profileId
+    ]);
 
-      }
+    res.json(result.rows[0]);
 
-      const image =
-        req.file.buffer.toString("base64");
+  } catch (error) {
+    console.error(error);
 
-      const mime =
-        req.file.mimetype || "image/jpeg";
+    res.status(500).json({
+      error: "Ошибка сохранения веса"
+    });
+  }
+});
 
-      const prompt = `
+/* =========================
+   AI ANALYSIS
+========================= */
+
+app.post("/api/analyze", upload.single("photo"), async (req, res) => {
+  try {
+
+    if (!process.env.OPENROUTER_API_KEY) {
+      return res.status(500).json({
+        error: "OPENROUTER_API_KEY не найден в Render"
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        error: "Фото не загружено"
+      });
+    }
+
+    const image =
+      req.file.buffer.toString("base64");
+
+    const mime =
+      req.file.mimetype || "image/jpeg";
+
+    const prompt = `
 Ты AI-ассистент приложения FoodLens.
 
 Проанализируй еду на фотографии.
@@ -624,7 +486,7 @@ app.post(
 
 Не создавай ложную точность.
 
-Верни ТОЛЬКО JSON следующего вида:
+Верни ТОЛЬКО JSON:
 
 {
   "items": [
@@ -647,162 +509,137 @@ app.post(
   "note": "краткая оговорка об оценке"
 }
 
-confidence должен быть числом от 0 до 1.
+confidence от 0 до 1.
 
 Не используй markdown.
 Не используй тройные обратные кавычки.
-Не добавляй никаких слов до или после JSON.
+Не добавляй слова до или после JSON.
 `;
 
-      const requestBody = {
-
-        model: "openrouter/free",
-
-        messages: [
-
-          {
-            role: "user",
-
-            content: [
-
-              {
-                type: "text",
-                text: prompt
-              },
-
-              {
-                type: "image_url",
-
-                image_url: {
-                  url:
-                    "data:" +
-                    mime +
-                    ";base64," +
-                    image
-                }
-
-              }
-
-            ]
-
-          }
-
-        ]
-
-      };
-
-      const response = await fetch(
-        "https://openrouter.ai/api/v1/chat/completions",
+    const requestBody = {
+      model: "openrouter/free",
+      messages: [
         {
-          method: "POST",
-
-          headers: {
-            "Authorization":
-              "Bearer " +
-              process.env.OPENROUTER_API_KEY,
-
-            "Content-Type":
-              "application/json"
-          },
-
-          body:
-            JSON.stringify(requestBody)
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: prompt
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url:
+                  "data:" +
+                  mime +
+                  ";base64," +
+                  image
+              }
+            }
+          ]
         }
-      );
+      ]
+    };
 
-      const result =
-        await response.json();
+    const response = await fetch(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        method: "POST",
 
-      if (!response.ok) {
+        headers: {
+          "Authorization":
+            "Bearer " +
+            process.env.OPENROUTER_API_KEY,
 
-        return res
-          .status(response.status)
-          .json({
-            error:
-              result?.error?.message ||
-              "Ошибка OpenRouter"
-          });
+          "Content-Type":
+            "application/json"
+        },
 
+        body:
+          JSON.stringify(requestBody)
       }
+    );
 
-      let text =
-        result?.choices?.[0]?.message?.content ||
-        "";
+    const result =
+      await response.json();
 
-      text = text.trim();
-
-      if (text.startsWith("```")) {
-
-        text =
-          text.replace(
-            /^```(?:json)?\s*/i,
-            ""
-          );
-
-        text =
-          text.replace(
-            /\s*```\s*$/i,
-            ""
-          );
-
-      }
-
-      const firstBrace =
-        text.indexOf("{");
-
-      const lastBrace =
-        text.lastIndexOf("}");
-
-      if (
-        firstBrace === -1 ||
-        lastBrace === -1
-      ) {
-
-        throw new Error(
-          "AI не вернул JSON"
-        );
-
-      }
-
-      text =
-        text.slice(
-          firstBrace,
-          lastBrace + 1
-        );
-
-      const data =
-        JSON.parse(text);
-
-      res.json(data);
-
-    } catch (error) {
-
-      console.error(
-        "FoodLens AI error:",
-        error
-      );
-
-      res.status(500).json({
+    if (!response.ok) {
+      return res.status(response.status).json({
         error:
-          error.message ||
-          "AI не смог обработать фото"
+          result?.error?.message ||
+          "Ошибка OpenRouter"
       });
-
     }
 
-  }
-);
+    let text =
+      result?.choices?.[0]?.message?.content ||
+      "";
 
+    text = text.trim();
+
+    if (text.startsWith("```")) {
+      text = text.replace(
+        /^```(?:json)?\s*/i,
+        ""
+      );
+
+      text = text.replace(
+        /\s*```\s*$/i,
+        ""
+      );
+    }
+
+    const firstBrace =
+      text.indexOf("{");
+
+    const lastBrace =
+      text.lastIndexOf("}");
+
+    if (
+      firstBrace === -1 ||
+      lastBrace === -1
+    ) {
+      throw new Error(
+        "AI не вернул JSON"
+      );
+    }
+
+    text =
+      text.slice(
+        firstBrace,
+        lastBrace + 1
+      );
+
+    const data =
+      JSON.parse(text);
+
+    res.json(data);
+
+  } catch (error) {
+
+    console.error(
+      "FoodLens AI error:",
+      error
+    );
+
+    res.status(500).json({
+      error:
+        error.message ||
+        "AI не смог обработать фото"
+    });
+  }
+});
 
 /* =========================
-   HEALTH CHECK
+   HEALTH
 ========================= */
 
 app.get("/api/health", async (req, res) => {
-
   try {
 
-    await pool.query("SELECT NOW()");
+    await pool.query(
+      "SELECT NOW()"
+    );
 
     res.json({
       ok: true,
@@ -813,39 +650,43 @@ app.get("/api/health", async (req, res) => {
 
     res.status(500).json({
       ok: false,
-      database: false,
-      error: error.message
+      database: false
     });
 
   }
-
 });
 
+/* =========================
+   STATIC
+========================= */
+
+app.use(
+  express.static(__dirname)
+);
+
+app.get("/", (req, res) => {
+  res.sendFile(
+    path.join(
+      __dirname,
+      "index.html"
+    )
+  );
+});
 
 /* =========================
-   ЗАПУСК
+   START
 ========================= */
 
 const PORT =
   process.env.PORT || 3000;
 
-async function startServer() {
-
-  await initDatabase();
-
-  app.listen(
-    PORT,
-    "0.0.0.0",
-    () => {
-
-      console.log(
-        "FoodLens running on port " +
-        PORT
-      );
-
-    }
-  );
-
-}
-
-startServer();
+app.listen(
+  PORT,
+  "0.0.0.0",
+  () => {
+    console.log(
+      "FoodLens running on port " +
+      PORT
+    );
+  }
+);
