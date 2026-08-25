@@ -329,7 +329,13 @@ label{
   background:#fff1f1;
   padding:12px;
   border-radius:12px;
-  font-size:13px
+  font-size:13px;
+  margin-top:10px
+}
+
+.diaryDate{
+  font-weight:800;
+  margin:14px 0 6px
 }
 
 .empty{
@@ -424,8 +430,7 @@ label{
 .nav div{
   text-align:center;
   font-size:11px;
-  color:var(--muted);
-  cursor:pointer
+  color:var(--muted)
 }
 
 .nav b{
@@ -441,9 +446,14 @@ label{
 <main class="app">
 
 <header class="top">
-  <div class="logo">FoodLens<span style="color:#8eb84d">.</span></div>
+  <div class="logo">
+    FoodLens<span style="color:#8eb84d">.</span>
+  </div>
+
   <div class="avatar">🙂</div>
 </header>
+
+<!-- ГЛАВНЫЙ БЛОК -->
 
 <section class="hero">
 
@@ -476,11 +486,18 @@ label{
 
 </section>
 
+<!-- ПРОГРЕСС ДНЯ -->
+
 <section class="card">
 
   <div class="row">
-    <h2 class="title">Прогресс дня</h2>
+
+    <h2 class="title">
+      Прогресс дня
+    </h2>
+
     <b id="percent">0%</b>
+
   </div>
 
   <div class="progress">
@@ -508,11 +525,23 @@ label{
 
 </section>
 
+<!-- ПРОГРЕСС ВЕСА -->
+
 <section class="card">
 
   <div class="row">
-    <h2 class="title">🎯 Прогресс веса</h2>
-    <span class="badge" id="weightProgressPercent">0%</span>
+
+    <h2 class="title">
+      🎯 Прогресс веса
+    </h2>
+
+    <span
+      class="badge"
+      id="weightProgressPercent"
+    >
+      0%
+    </span>
+
   </div>
 
   <div class="goalBox">
@@ -520,53 +549,116 @@ label{
     <div class="goalNumbers">
 
       <div class="goalNumber">
-        <b id="startWeightDisplay">—</b>
-        <span>Начальный вес</span>
+
+        <b id="startWeightDisplay">
+          —
+        </b>
+
+        <span>
+          Начальный вес
+        </span>
+
       </div>
 
       <div class="goalNumber">
-        <b id="currentWeightDisplay">—</b>
-        <span>Сейчас</span>
+
+        <b id="currentWeightDisplay">
+          —
+        </b>
+
+        <span>
+          Сейчас
+        </span>
+
       </div>
 
       <div class="goalNumber">
-        <b id="targetWeightDisplay">—</b>
-        <span>Цель</span>
+
+        <b id="targetWeightDisplay">
+          —
+        </b>
+
+        <span>
+          Цель
+        </span>
+
       </div>
 
     </div>
 
     <div class="progress">
-      <div class="bar" id="weightBar"></div>
+
+      <div
+        class="bar"
+        id="weightBar"
+      ></div>
+
     </div>
 
     <div class="row">
-      <span class="small" id="weightLostText">—</span>
-      <span class="small" id="weightRemainingText">—</span>
+
+      <span
+        class="small"
+        id="weightLostText"
+      >
+        —
+      </span>
+
+      <span
+        class="small"
+        id="weightRemainingText"
+      >
+        —
+      </span>
+
     </div>
 
   </div>
 
   <div class="chartWrap">
+
     <canvas id="weightChart"></canvas>
+
   </div>
 
-  <button class="primary" style="margin-top:12px" onclick="showWeightForm()">
+  <button
+    class="primary"
+    style="margin-top:12px"
+    onclick="showWeightForm()"
+  >
     ⚖️ Записать сегодняшний вес
   </button>
 
 </section>
 
-<section class="card hidden" id="weightFormCard">
+<!-- ФОРМА ВЕСА -->
+
+<section
+  class="card hidden"
+  id="weightFormCard"
+>
 
   <div class="row">
-    <h2 class="title">⚖️ Новое взвешивание</h2>
-    <button class="secondary" style="width:auto;margin:0" onclick="hideWeightForm()">Закрыть</button>
+
+    <h2 class="title">
+      ⚖️ Новое взвешивание
+    </h2>
+
+    <button
+      class="secondary"
+      style="width:auto;margin:0"
+      onclick="hideWeightForm()"
+    >
+      Закрыть
+    </button>
+
   </div>
 
   <div style="margin-top:12px">
 
-    <label>Вес сегодня, кг</label>
+    <label>
+      Вес сегодня, кг
+    </label>
 
     <input
       id="newWeight"
@@ -579,81 +671,169 @@ label{
 
   </div>
 
-  <button class="primary" style="margin-top:12px" onclick="saveWeight()">
+  <button
+    class="primary"
+    style="margin-top:12px"
+    onclick="saveWeight()"
+  >
     Сохранить вес
   </button>
 
-  <p id="weightError" class="error hidden"></p>
+  <p
+    id="weightError"
+    class="error hidden"
+  ></p>
 
 </section>
+
+<!-- ДОБАВЛЕНИЕ ЕДЫ -->
 
 <section class="card">
 
   <div class="row">
-    <h2 class="title">✨ Добавить еду</h2>
-    <span class="small">AI Vision</span>
+
+    <h2 class="title">
+      ✨ Добавить еду
+    </h2>
+
+    <span class="small">
+      AI Vision
+    </span>
+
   </div>
 
   <div class="camera">
 
-    <div class="cameraIcon">📸</div>
+    <div class="cameraIcon">
+      📸
+    </div>
 
-    <h3>Сфотографируй блюдо</h3>
+    <h3>
+      Сфотографируй блюдо
+    </h3>
 
     <p class="muted">
-      AI определит продукты, примерную порцию и калории.
+      AI определит продукты,
+      примерную порцию и калории.
     </p>
 
     <label class="upload">
+
       Выбрать фото / открыть камеру
-      <input id="photo" type="file" accept="image/*" capture="environment">
+
+      <input
+        id="photo"
+        type="file"
+        accept="image/*"
+        capture="environment"
+      >
+
     </label>
 
   </div>
 
   <div id="status"></div>
 
-  <img id="preview" class="preview hidden">
+  <img
+    id="preview"
+    class="preview hidden"
+  >
 
-  <div id="result" class="hidden"></div>
+  <div
+    id="result"
+    class="hidden"
+  ></div>
 
 </section>
+
+<!-- ПРОФИЛЬ -->
 
 <section class="card">
 
   <div class="row">
-    <h2 class="title">👤 Твой профиль</h2>
+
+    <h2 class="title">
+      👤 Твой профиль
+    </h2>
+
   </div>
 
-  <div class="formGrid" style="margin-top:12px">
+  <div
+    class="formGrid"
+    style="margin-top:12px"
+  >
 
     <div>
-      <label>Возраст</label>
-      <input id="age" type="number" inputmode="numeric" value="18">
+
+      <label>
+        Возраст
+      </label>
+
+      <input
+        id="age"
+        type="number"
+        inputmode="numeric"
+        value="18"
+      >
+
     </div>
 
     <div>
-      <label>Пол</label>
+
+      <label>
+        Пол
+      </label>
 
       <select id="sex">
-        <option value="male">Мужской</option>
-        <option value="female">Женский</option>
+
+        <option value="male">
+          Мужской
+        </option>
+
+        <option value="female">
+          Женский
+        </option>
+
       </select>
+
     </div>
 
     <div>
-      <label>Начальный вес, кг</label>
-      <input id="weight" type="number" inputmode="decimal" step="0.1" value="70">
+
+      <label>
+        Начальный вес, кг
+      </label>
+
+      <input
+        id="weight"
+        type="number"
+        inputmode="decimal"
+        step="0.1"
+        value="70"
+      >
+
     </div>
 
     <div>
-      <label>Рост, см</label>
-      <input id="height" type="number" inputmode="numeric" value="175">
+
+      <label>
+        Рост, см
+      </label>
+
+      <input
+        id="height"
+        type="number"
+        inputmode="numeric"
+        value="175"
+      >
+
     </div>
 
   </div>
 
-  <label style="margin-top:8px">Целевой вес, кг</label>
+  <label style="margin-top:8px">
+    Целевой вес, кг
+  </label>
 
   <input
     id="targetWeight"
@@ -663,46 +843,89 @@ label{
     placeholder="Например, 80"
   >
 
-  <label style="margin-top:8px">Активность</label>
+  <label style="margin-top:8px">
+    Активность
+  </label>
 
   <select id="activity">
 
-    <option value="1.2">Минимальная</option>
-    <option value="1.375">Лёгкая</option>
-    <option value="1.55" selected>Средняя</option>
-    <option value="1.725">Высокая</option>
+    <option value="1.2">
+      Минимальная
+    </option>
+
+    <option value="1.375">
+      Лёгкая
+    </option>
+
+    <option
+      value="1.55"
+      selected
+    >
+      Средняя
+    </option>
+
+    <option value="1.725">
+      Высокая
+    </option>
 
   </select>
 
-  <button class="primary" style="margin-top:12px" onclick="saveProfileAndGoal()">
+  <button
+    class="primary"
+    style="margin-top:12px"
+    onclick="saveProfileAndGoal()"
+  >
     Сохранить профиль и цель
   </button>
 
-  <p id="goalText" class="small"></p>
+  <p
+    id="goalText"
+    class="small"
+  ></p>
 
 </section>
+
+<!-- ДНЕВНИК -->
 
 <section class="card">
 
   <div class="row">
 
-    <h2 class="title">📖 Сегодня</h2>
+    <h2 class="title">
+      📖 Сегодня
+    </h2>
 
-    <span class="small" id="mealCount">0</span>
+    <span
+      class="small"
+      id="mealCount"
+    >
+      0
+    </span>
 
   </div>
 
   <div id="diary">
-    <div class="empty">Добавь первое блюдо 📸</div>
+
+    <div class="empty">
+      Добавь первое блюдо 📸
+    </div>
+
   </div>
 
 </section>
 
-<section class="card hidden" id="historyCard">
+<!-- ИСТОРИЯ -->
+
+<section
+  class="card hidden"
+  id="historyCard"
+>
 
   <div class="row">
 
-    <h2 class="title">🗓 История</h2>
+    <h2 class="title">
+      🗓 История
+    </h2>
 
     <button
       class="secondary"
@@ -718,11 +941,18 @@ label{
 
 </section>
 
-<section class="card hidden" id="manualCard">
+<!-- РУЧНОЕ ДОБАВЛЕНИЕ -->
+
+<section
+  class="card hidden"
+  id="manualCard"
+>
 
   <div class="row">
 
-    <h2 class="title">✍️ Добавить вручную</h2>
+    <h2 class="title">
+      ✍️ Добавить вручную
+    </h2>
 
     <button
       class="secondary"
@@ -736,7 +966,9 @@ label{
 
   <div style="margin-top:12px">
 
-    <label>Название блюда</label>
+    <label>
+      Название блюда
+    </label>
 
     <input
       id="mName"
@@ -745,31 +977,85 @@ label{
 
   </div>
 
-  <div class="formGrid" style="margin-top:8px">
+  <div
+    class="formGrid"
+    style="margin-top:8px"
+  >
 
     <div>
-      <label>Калории, ккал</label>
-      <input id="mCal" type="number" min="0" step="1">
+
+      <label>
+        Калории, ккал
+      </label>
+
+      <input
+        id="mCal"
+        type="number"
+        min="0"
+        step="1"
+      >
+
     </div>
 
     <div>
-      <label>Порция, г</label>
-      <input id="mGrams" type="number" min="0" step="1" value="100">
+
+      <label>
+        Порция, г
+      </label>
+
+      <input
+        id="mGrams"
+        type="number"
+        min="0"
+        step="1"
+        value="100"
+      >
+
     </div>
 
     <div>
-      <label>Белки, г</label>
-      <input id="mP" type="number" min="0" step="0.1">
+
+      <label>
+        Белки, г
+      </label>
+
+      <input
+        id="mP"
+        type="number"
+        min="0"
+        step="0.1"
+      >
+
     </div>
 
     <div>
-      <label>Жиры, г</label>
-      <input id="mF" type="number" min="0" step="0.1">
+
+      <label>
+        Жиры, г
+      </label>
+
+      <input
+        id="mF"
+        type="number"
+        min="0"
+        step="0.1"
+      >
+
     </div>
 
     <div>
-      <label>Углеводы, г</label>
-      <input id="mC" type="number" min="0" step="0.1">
+
+      <label>
+        Углеводы, г
+      </label>
+
+      <input
+        id="mC"
+        type="number"
+        min="0"
+        step="0.1"
+      >
+
     </div>
 
   </div>
@@ -782,12 +1068,19 @@ label{
     Добавить в дневник
   </button>
 
-  <p id="manualError" class="error hidden"></p>
+  <p
+    id="manualError"
+    class="error hidden"
+  ></p>
 
 </section>
 
-<p class="small" style="padding:4px 4px">
-  Важно: калории, масса и БЖУ по фотографии — приблизительная оценка, а не медицинское измерение.
+<p
+  class="small"
+  style="padding:4px 4px"
+>
+  Важно: калории, масса и БЖУ по фотографии —
+  приблизительная оценка, а не медицинское измерение.
 </p>
 
 </main>
@@ -795,263 +1088,225 @@ label{
 <nav class="nav">
 
   <div onclick="showHome()">
+
     <b>⌂</b>
     Главная
+
   </div>
 
   <div onclick="showAdd()">
+
     <b>＋</b>
     Добавить
+
   </div>
 
   <div onclick="showHistory()">
+
     <b>◷</b>
     История
+
   </div>
 
 </nav>
 
 <script>
 
-/* =====================================================
-   FOODLENS
-   DATABASE VERSION
-===================================================== */
+const $ =
+  x => document.getElementById(x);
 
-const $ = id => document.getElementById(id);
-
-let userId = localStorage.getItem("foodlens-user-id");
-
-let profile = null;
-
-let goal = 0;
-
-let day = {
-  cal:0,
-  p:0,
-  f:0,
-  c:0,
-  meals:[]
-};
-
-let weightHistory = [];
-
-/* =====================================================
-   DATE
-===================================================== */
+/* =========================
+   ДАТА
+========================= */
 
 function todayKey(){
 
   const d = new Date();
 
-  const y = d.getFullYear();
+  const y =
+    d.getFullYear();
 
   const m =
-    String(d.getMonth()+1)
-      .padStart(2,"0");
+    String(
+      d.getMonth()+1
+    ).padStart(2,"0");
 
   const day =
-    String(d.getDate())
-      .padStart(2,"0");
+    String(
+      d.getDate()
+    ).padStart(2,"0");
 
   return `${y}-${m}-${day}`;
-
 }
 
-/* =====================================================
-   API
-===================================================== */
+/* =========================
+   ПОЛЬЗОВАТЕЛЬ
+========================= */
 
-async function api(url, options = {}){
+function getUserId(){
 
-  const response =
-    await fetch(url,{
-      headers:{
-        "Content-Type":"application/json",
-        ...(options.headers || {})
-      },
-      ...options
-    });
-
-  let data = null;
-
-  try{
-    data = await response.json();
-  }catch{}
-
-  if(!response.ok){
-
-    throw new Error(
-      data?.error ||
-      "Ошибка сервера"
-    );
-
-  }
-
-  return data;
-
-}
-
-/* =====================================================
-   CREATE USER
-===================================================== */
-
-async function createUser(){
-
-  const data =
-    await api(
-      "/api/user",
-      {
-        method:"POST",
-        body:JSON.stringify({
-          age:null,
-          sex:null,
-          startWeight:null,
-          currentWeight:null,
-          targetWeight:null,
-          height:null,
-          activity:null,
-          calorieGoal:0
-        })
-      }
-    );
-
-  userId =
-    String(data.user.id);
-
-  localStorage.setItem(
-    "foodlens-user-id",
-    userId
-  );
-
-  profile = data.user;
-
-}
-
-/* =====================================================
-   LOAD USER
-===================================================== */
-
-async function loadUser(){
-
-  try{
-
-    if(!userId){
-
-      await createUser();
-
-      return;
-
-    }
-
-    const data =
-      await api(
-        "/api/user/"+userId
-      );
-
-    profile = data;
-
-  }catch(error){
-
-    console.error(error);
-
-    /*
-      Если старый user id больше не существует,
-      создаём нового.
-    */
-
-    localStorage.removeItem(
+  let userId =
+    localStorage.getItem(
       "foodlens-user-id"
     );
 
-    await createUser();
+  if(!userId){
+
+    if(
+      window.crypto &&
+      crypto.randomUUID
+    ){
+
+      userId =
+        crypto.randomUUID();
+
+    }else{
+
+      userId =
+        "user-" +
+        Date.now() +
+        "-" +
+        Math.random()
+          .toString(36)
+          .slice(2);
+
+    }
+
+    localStorage.setItem(
+      "foodlens-user-id",
+      userId
+    );
 
   }
 
+  return userId;
 }
 
-/* =====================================================
-   LOAD TODAY MEALS
-===================================================== */
+/* =========================
+   ДАННЫЕ
+========================= */
 
-async function loadTodayMeals(){
+function emptyDay(){
 
-  const data =
-    await api(
-      `/api/meals/${userId}/${todayKey()}`
-    );
+  return {
 
-  day = {
     cal:0,
     p:0,
     f:0,
     c:0,
     meals:[]
+
   };
 
-  for(const m of data.meals){
+}
 
-    const meal = {
+let profile =
+  JSON.parse(
+    localStorage.getItem(
+      "foodlens-profile"
+    ) || "null"
+  );
 
-      id:m.id,
+let goal =
+  Number(
+    localStorage.getItem(
+      "foodlens-goal"
+    ) || 0
+  );
 
-      name:m.name,
+let history =
+  JSON.parse(
+    localStorage.getItem(
+      "foodlens-history"
+    ) || "{}"
+  );
 
-      grams:Number(m.grams)||0,
+let weightHistory =
+  JSON.parse(
+    localStorage.getItem(
+      "foodlens-weight-history"
+    ) || "[]"
+  );
 
-      calories:Number(m.calories)||0,
+const currentKey =
+  todayKey();
 
-      protein:Number(m.protein)||0,
+if(!history[currentKey]){
 
-      fat:Number(m.fat)||0,
-
-      carbs:Number(m.carbs)||0,
-
-      time:m.meal_time || ""
-
-    };
-
-    day.meals.push(meal);
-
-    day.cal += meal.calories;
-
-    day.p += meal.protein;
-
-    day.f += meal.fat;
-
-    day.c += meal.carbs;
-
-  }
+  history[currentKey] =
+    emptyDay();
 
 }
 
-/* =====================================================
-   LOAD WEIGHTS
-===================================================== */
+let day =
+  history[currentKey];
 
-async function loadWeights(){
+/* =========================
+   СОХРАНЕНИЕ
+========================= */
 
-  const data =
-    await api(
-      `/api/weight/${userId}`
-    );
+function saveDay(){
 
-  weightHistory =
-    data.weights.map(x => ({
-      date:x.date,
-      weight:Number(x.weight)
-    }));
+  history[todayKey()] =
+    day;
+
+  localStorage.setItem(
+    "foodlens-history",
+    JSON.stringify(history)
+  );
 
 }
 
-/* =====================================================
+function saveWeights(){
+
+  localStorage.setItem(
+    "foodlens-weight-history",
+    JSON.stringify(weightHistory)
+  );
+
+}
+
+function saveProfile(){
+
+  localStorage.setItem(
+    "foodlens-profile",
+    JSON.stringify(profile)
+  );
+
+}
+
+/* =========================
+   HTML SECURITY
+========================= */
+
+function escapeHtml(s){
+
+  return String(
+    s ?? ""
+  ).replace(
+    /[&<>"']/g,
+    c => ({
+
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      "\"":"&quot;",
+      "'":"&#039;"
+
+    }[c])
+  );
+
+}
+
+/* =========================
    RENDER
-===================================================== */
+========================= */
 
 function render(){
 
   $("heroCal").textContent =
-    Math.round(day.cal)+" ккал";
+    Math.round(day.cal) +
+    " ккал";
 
   $("heroGoal").textContent =
     goal
@@ -1062,12 +1317,15 @@ function render(){
     goal
       ? Math.max(
           0,
-          Math.round(goal-day.cal)
+          Math.round(
+            goal-day.cal
+          )
         )
       : "—";
 
   $("heroP").textContent =
-    Math.round(day.p)+" г";
+    Math.round(day.p) +
+    " г";
 
   $("heroMeals").textContent =
     day.meals.length;
@@ -1086,134 +1344,128 @@ function render(){
       ? Math.min(
           100,
           Math.round(
-            day.cal/goal*100
+            day.cal /
+            goal *
+            100
           )
         )
       : 0;
 
   $("percent").textContent =
-    pct+"%";
+    pct + "%";
 
   $("bar").style.width =
-    pct+"%";
+    pct + "%";
 
   $("mealCount").textContent =
-    day.meals.length+" приёмов";
+    day.meals.length +
+    " приёмов";
 
-  if(day.meals.length){
+  $("diary").innerHTML =
+    day.meals.length
 
-    $("diary").innerHTML =
-      day.meals.map(
-        (m,i)=>`
+      ? day.meals.map(
+          (m,i) => `
 
-        <div class="item">
+      <div class="item">
 
-          <div>
+        <div>
 
-            <b>
-              ${escapeHtml(m.name)}
-            </b>
+          <b>
+            ${escapeHtml(m.name)}
+          </b>
 
-            <br>
+          <br>
 
-            <span class="small">
+          <span class="small">
 
-              ${m.time || ""}
+            ${m.time}
+            · ${Math.round(m.protein || 0)} г белка
+            · ${Math.round(m.fat || 0)} г жиров
+            · ${Math.round(m.carbs || 0)} г углеводов
 
-              · ${Math.round(m.protein||0)} г белка
-
-              · ${Math.round(m.fat||0)} г жиров
-
-              · ${Math.round(m.carbs||0)} г углеводов
-
-            </span>
-
-          </div>
-
-          <div style="text-align:right">
-
-            <b>
-              ${Math.round(m.calories)} ккал
-            </b>
-
-            <br>
-
-            <button
-              class="secondary"
-              style="width:auto;margin-top:6px;padding:7px 10px"
-              onclick="removeMeal(${i})"
-            >
-              Удалить
-            </button>
-
-          </div>
+          </span>
 
         </div>
 
-      `
-      ).join("");
+        <div style="text-align:right">
 
-  }else{
+          <b>
+            ${Math.round(m.calories)}
+            ккал
+          </b>
 
-    $("diary").innerHTML =
+          <br>
+
+          <button
+            class="secondary"
+            style="width:auto;margin-top:6px;padding:7px 10px"
+            onclick="removeMeal(${i})"
+          >
+            Удалить
+          </button>
+
+        </div>
+
+      </div>
+
+    `
+        ).join("")
+
+      :
+
       '<div class="empty">Добавь первое блюдо 📸</div>';
 
-  }
+  saveDay();
 
   renderWeightProgress();
 
 }
 
-/* =====================================================
-   ESCAPE HTML
-===================================================== */
-
-function escapeHtml(s){
-
-  return String(s ?? "").replace(
-    /[&<>"']/g,
-    c => ({
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      "\"":"&quot;",
-      "'":"&#039;"
-    }[c])
-  );
-
-}
-
-/* =====================================================
-   WEIGHT PROGRESS
-===================================================== */
+/* =========================
+   ПРОГРЕСС ВЕСА
+========================= */
 
 function renderWeightProgress(){
 
   if(!profile){
 
-    $("startWeightDisplay").textContent="—";
-    $("currentWeightDisplay").textContent="—";
-    $("targetWeightDisplay").textContent="—";
+    $("startWeightDisplay")
+      .textContent = "—";
 
-    $("weightProgressPercent").textContent="0%";
+    $("currentWeightDisplay")
+      .textContent = "—";
 
-    $("weightLostText").textContent=
-      "Создай цель";
+    $("targetWeightDisplay")
+      .textContent = "—";
 
-    $("weightRemainingText").textContent="";
+    $("weightProgressPercent")
+      .textContent = "0%";
 
-    $("weightBar").style.width="0%";
+    $("weightLostText")
+      .textContent = "Создай цель";
+
+    $("weightRemainingText")
+      .textContent = "";
+
+    $("weightBar")
+      .style.width = "0%";
 
     drawWeightChart();
 
     return;
+
   }
 
   const start =
-    Number(profile.start_weight || profile.startWeight);
+    Number(
+      profile.startWeight
+    );
 
   const target =
-    Number(profile.target_weight || profile.targetWeight);
+    Number(
+      profile.targetWeight
+    );
 
   const latest =
     weightHistory.length
@@ -1223,34 +1475,36 @@ function renderWeightProgress(){
           ].weight
         )
       : Number(
-          profile.current_weight ||
           profile.currentWeight ||
           start
         );
 
-  if(!Number.isFinite(start) ||
-     !Number.isFinite(target)){
+  $("startWeightDisplay")
+    .textContent =
+      start.toFixed(1) +
+      " кг";
 
-    return;
+  $("currentWeightDisplay")
+    .textContent =
+      latest.toFixed(1) +
+      " кг";
 
-  }
-
-  $("startWeightDisplay").textContent =
-    start.toFixed(1)+" кг";
-
-  $("currentWeightDisplay").textContent =
-    latest.toFixed(1)+" кг";
-
-  $("targetWeightDisplay").textContent =
-    target.toFixed(1)+" кг";
+  $("targetWeightDisplay")
+    .textContent =
+      target.toFixed(1) +
+      " кг";
 
   let progress = 0;
 
-  if(start !== target){
+  if(
+    start !== target
+  ){
 
     progress =
-      ((start-latest)/
-      (start-target))*100;
+      (
+        (start-latest) /
+        (start-target)
+      ) * 100;
 
     progress =
       Math.max(
@@ -1263,50 +1517,63 @@ function renderWeightProgress(){
 
   }
 
-  $("weightProgressPercent").textContent =
-    Math.round(progress)+"%";
+  $("weightProgressPercent")
+    .textContent =
+      Math.round(progress) +
+      "%";
 
-  $("weightBar").style.width =
-    progress+"%";
+  $("weightBar")
+    .style.width =
+      progress + "%";
 
   const lost =
     start-latest;
 
   const remaining =
-    Math.abs(latest-target);
+    Math.abs(
+      latest-target
+    );
 
-  if(Math.abs(lost)<0.05){
+  if(
+    Math.abs(lost) < 0.05
+  ){
 
-    $("weightLostText").textContent =
+    $("weightLostText")
+      .textContent =
       "Изменение: 0 кг";
 
-  }else if(lost>0){
+  }else if(lost > 0){
 
-    $("weightLostText").textContent =
+    $("weightLostText")
+      .textContent =
       `Сброшено: ${lost.toFixed(1)} кг`;
 
   }else{
 
-    $("weightLostText").textContent =
+    $("weightLostText")
+      .textContent =
       `Изменение: +${Math.abs(lost).toFixed(1)} кг`;
 
   }
 
-  if(latest>target){
+  if(latest > target){
 
-    $("weightRemainingText").textContent =
+    $("weightRemainingText")
+      .textContent =
       `До цели: ${remaining.toFixed(1)} кг`;
 
   }else if(
-    Math.abs(latest-target)<0.05
+    Math.abs(latest-target) < 0.05
   ){
 
-    $("weightRemainingText").textContent =
+    $("weightRemainingText")
+      .textContent =
       "🎯 Цель достигнута!";
 
   }else{
 
-    $("weightRemainingText").textContent =
+    $("weightRemainingText")
+      .textContent =
       `Ниже цели на ${remaining.toFixed(1)} кг`;
 
   }
@@ -1315,9 +1582,9 @@ function renderWeightProgress(){
 
 }
 
-/* =====================================================
-   WEIGHT CHART
-===================================================== */
+/* =========================
+   ГРАФИК
+========================= */
 
 function drawWeightChart(){
 
@@ -1332,13 +1599,16 @@ function drawWeightChart(){
   const width =
     Math.max(
       300,
-      Math.floor(rect.width||300)
+      Math.floor(
+        rect.width || 300
+      )
     );
 
-  const height=220;
+  const height =
+    220;
 
   const dpr =
-    window.devicePixelRatio||1;
+    window.devicePixelRatio || 1;
 
   canvas.width =
     width*dpr;
@@ -1349,13 +1619,9 @@ function drawWeightChart(){
   const ctx =
     canvas.getContext("2d");
 
-  ctx.setTransform(
+  ctx.scale(
     dpr,
-    0,
-    0,
-    dpr,
-    0,
-    0
+    dpr
   );
 
   ctx.clearRect(
@@ -1365,13 +1631,18 @@ function drawWeightChart(){
     height
   );
 
-  if(weightHistory.length===0){
+  if(
+    weightHistory.length === 0
+  ){
 
-    ctx.fillStyle="#7b8582";
+    ctx.fillStyle =
+      "#7b8582";
 
-    ctx.font="14px system-ui";
+    ctx.font =
+      "14px system-ui";
 
-    ctx.textAlign="center";
+    ctx.textAlign =
+      "center";
 
     ctx.fillText(
       "Добавь первое взвешивание",
@@ -1385,18 +1656,16 @@ function drawWeightChart(){
 
   const values =
     weightHistory.map(
-      x=>Number(x.weight)
+      x => Number(x.weight)
     );
 
   if(
     profile &&
-    (profile.target_weight ||
-     profile.targetWeight)
+    profile.targetWeight
   ){
 
     values.push(
       Number(
-        profile.target_weight ||
         profile.targetWeight
       )
     );
@@ -1409,7 +1678,8 @@ function drawWeightChart(){
   const max =
     Math.max(...values);
 
-  const padding=30;
+  const padding =
+    30;
 
   const range =
     Math.max(
@@ -1418,32 +1688,55 @@ function drawWeightChart(){
     );
 
   const xStep =
-    weightHistory.length>1
-      ?(
-        width-padding*2
-      )/
-      (weightHistory.length-1)
-      :0;
+    weightHistory.length > 1
+
+      ? (
+          width -
+          padding*2
+        ) /
+        (
+          weightHistory.length-1
+        )
+
+      : 0;
 
   function y(value){
 
-    return height-padding-
-      ((value-min)/range)*
-      (height-padding*2);
+    return (
+      height -
+      padding -
+      (
+        (value-min) /
+        range
+      ) *
+      (
+        height -
+        padding*2
+      )
+    );
 
   }
 
-  ctx.strokeStyle="#e1e5e2";
+  ctx.strokeStyle =
+    "#e1e5e2";
 
-  ctx.lineWidth=1;
+  ctx.lineWidth =
+    1;
 
-  for(let i=0;i<4;i++){
+  for(
+    let i=0;
+    i<4;
+    i++
+  ){
 
     const gy =
-      padding+
-      i*
+      padding +
+      i *
       (
-        (height-padding*2)/3
+        (
+          height -
+          padding*2
+        ) / 3
       );
 
     ctx.beginPath();
@@ -1462,23 +1755,24 @@ function drawWeightChart(){
 
   }
 
-  const target =
-    profile
-      ? Number(
-          profile.target_weight ||
-          profile.targetWeight
-        )
-      : null;
-
   if(
-    Number.isFinite(target)
+    profile &&
+    profile.targetWeight
   ){
 
-    const ty=y(target);
+    const ty =
+      y(
+        Number(
+          profile.targetWeight
+        )
+      );
 
-    ctx.setLineDash([5,5]);
+    ctx.setLineDash(
+      [5,5]
+    );
 
-    ctx.strokeStyle="#aeb8b4";
+    ctx.strokeStyle =
+      "#aeb8b4";
 
     ctx.beginPath();
 
@@ -1496,9 +1790,11 @@ function drawWeightChart(){
 
     ctx.setLineDash([]);
 
-    ctx.fillStyle="#7b8582";
+    ctx.fillStyle =
+      "#7b8582";
 
-    ctx.font="11px system-ui";
+    ctx.font =
+      "11px system-ui";
 
     ctx.fillText(
       "цель",
@@ -1511,33 +1807,51 @@ function drawWeightChart(){
 
   }
 
-  ctx.strokeStyle="#111719";
+  ctx.strokeStyle =
+    "#111719";
 
-  ctx.lineWidth=3;
+  ctx.lineWidth =
+    3;
 
-  ctx.lineJoin="round";
+  ctx.lineJoin =
+    "round";
 
-  ctx.lineCap="round";
+  ctx.lineCap =
+    "round";
 
   ctx.beginPath();
 
   weightHistory.forEach(
-    (point,i)=>{
+    (point,i) => {
 
       const x =
-        weightHistory.length===1
+        weightHistory.length === 1
           ? width/2
-          : padding+xStep*i;
+          : padding +
+            xStep*i;
 
       const yy =
         y(
-          Number(point.weight)
+          Number(
+            point.weight
+          )
         );
 
-      if(i===0)
-        ctx.moveTo(x,yy);
-      else
-        ctx.lineTo(x,yy);
+      if(i===0){
+
+        ctx.moveTo(
+          x,
+          yy
+        );
+
+      }else{
+
+        ctx.lineTo(
+          x,
+          yy
+        );
+
+      }
 
     }
   );
@@ -1545,19 +1859,23 @@ function drawWeightChart(){
   ctx.stroke();
 
   weightHistory.forEach(
-    (point,i)=>{
+    (point,i) => {
 
       const x =
-        weightHistory.length===1
+        weightHistory.length === 1
           ? width/2
-          : padding+xStep*i;
+          : padding +
+            xStep*i;
 
       const yy =
         y(
-          Number(point.weight)
+          Number(
+            point.weight
+          )
         );
 
-      ctx.fillStyle="#b9e769";
+      ctx.fillStyle =
+        "#b9e769";
 
       ctx.beginPath();
 
@@ -1571,9 +1889,11 @@ function drawWeightChart(){
 
       ctx.fill();
 
-      ctx.strokeStyle="#111719";
+      ctx.strokeStyle =
+        "#111719";
 
-      ctx.lineWidth=2;
+      ctx.lineWidth =
+        2;
 
       ctx.stroke();
 
@@ -1588,27 +1908,35 @@ function drawWeightChart(){
   if(last){
 
     const x =
-      weightHistory.length===1
+      weightHistory.length === 1
         ? width/2
-        : padding+
-          xStep*
-          (weightHistory.length-1);
+        : padding +
+          xStep *
+          (
+            weightHistory.length-1
+          );
 
     const yy =
       y(
-        Number(last.weight)
+        Number(
+          last.weight
+        )
       );
 
-    ctx.fillStyle="#111719";
+    ctx.fillStyle =
+      "#111719";
 
-    ctx.font=
+    ctx.font =
       "bold 13px system-ui";
 
-    ctx.textAlign="right";
+    ctx.textAlign =
+      "right";
 
     ctx.fillText(
-      Number(last.weight)
-        .toFixed(1)+" кг",
+      Number(
+        last.weight
+      ).toFixed(1) +
+      " кг",
       Math.min(
         width-padding,
         x+45
@@ -1620,9 +1948,9 @@ function drawWeightChart(){
 
 }
 
-/* =====================================================
-   WEIGHT FORM
-===================================================== */
+/* =========================
+   ПОКАЗАТЬ ФОРМУ ВЕСА
+========================= */
 
 function showWeightForm(){
 
@@ -1631,19 +1959,18 @@ function showWeightForm(){
     .remove("hidden");
 
   $("newWeight").value =
-    weightHistory.length
-      ? weightHistory[
-          weightHistory.length-1
-        ].weight
-      : (
-          profile
-            ? (
-              profile.start_weight ||
-              profile.startWeight ||
-              ""
-            )
-            : ""
-        );
+    profile
+
+      ? (
+          weightHistory.length
+            ? weightHistory[
+                weightHistory.length-1
+              ].weight
+            : profile.currentWeight ||
+              profile.startWeight
+        )
+
+      : "";
 
   $("weightFormCard")
     .scrollIntoView({
@@ -1660,9 +1987,10 @@ function hideWeightForm(){
 
 }
 
-/* =====================================================
-   SAVE WEIGHT
-===================================================== */
+/* =========================
+   СОХРАНЕНИЕ ВЕСА
+   POSTGRESQL
+========================= */
 
 async function saveWeight(){
 
@@ -1673,11 +2001,12 @@ async function saveWeight(){
 
   if(
     !Number.isFinite(value) ||
-    value<=0 ||
-    value>500
+    value <= 0 ||
+    value > 500
   ){
 
-    $("weightError").textContent =
+    $("weightError")
+      .textContent =
       "Введи корректный вес.";
 
     $("weightError")
@@ -1692,39 +2021,147 @@ async function saveWeight(){
     .classList
     .add("hidden");
 
+  const date =
+    todayKey();
+
+  const userId =
+    getUserId();
+
   try{
 
-    await api(
-      "/api/weight",
-      {
-        method:"POST",
+    $("weightError")
+      .classList
+      .remove("hidden");
 
-        body:JSON.stringify({
+    $("weightError")
+      .textContent =
+      "Сохраняем вес…";
 
-          userId:Number(userId),
+    const response =
+      await fetch(
+        "/api/weight",
+        {
 
-          date:todayKey(),
+          method:"POST",
 
-          weight:Number(
-            value.toFixed(1)
-          )
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
 
-        })
+          body:JSON.stringify({
 
-      }
+            userId:userId,
+
+            date:date,
+
+            weight:
+              Number(
+                value.toFixed(1)
+              )
+
+          })
+
+        }
+      );
+
+    let data;
+
+    try{
+
+      data =
+        await response.json();
+
+    }catch{
+
+      throw new Error(
+        "Сервер вернул неправильный ответ"
+      );
+
+    }
+
+    if(!response.ok){
+
+      throw new Error(
+        data.error ||
+        "Ошибка сохранения"
+      );
+
+    }
+
+    const existing =
+      weightHistory.findIndex(
+        x =>
+          x.date === date
+      );
+
+    const record = {
+
+      date:date,
+
+      weight:
+        Number(
+          value.toFixed(1)
+        )
+
+    };
+
+    if(existing >= 0){
+
+      weightHistory[
+        existing
+      ] = record;
+
+    }else{
+
+      weightHistory.push(
+        record
+      );
+
+    }
+
+    weightHistory.sort(
+      (a,b) =>
+        a.date.localeCompare(
+          b.date
+        )
     );
 
-    await loadUser();
+    saveWeights();
 
-    await loadWeights();
+    if(profile){
+
+      profile.currentWeight =
+        Number(
+          value.toFixed(1)
+        );
+
+      saveProfile();
+
+    }
+
+    $("weightError")
+      .classList
+      .add("hidden");
 
     hideWeightForm();
 
-    render();
+    renderWeightProgress();
+
+    alert(
+      "Вес сохранён ✅"
+    );
 
   }catch(error){
 
-    $("weightError").textContent =
+    console.error(
+      "Weight save error:",
+      error
+    );
+
+    $("weightError")
+      .textContent =
+      "Ошибка сохранения: " +
       error.message;
 
     $("weightError")
@@ -1735,50 +2172,138 @@ async function saveWeight(){
 
 }
 
-/* =====================================================
-   REMOVE MEAL
-===================================================== */
+/* =========================
+   ЗАГРУЗКА ВЕСА ИЗ POSTGRESQL
+========================= */
 
-async function removeMeal(i){
-
-  const meal =
-    day.meals[i];
-
-  if(!meal)return;
+async function loadWeightsFromDatabase(){
 
   try{
 
-    if(meal.id){
+    const userId =
+      getUserId();
 
-      await api(
-        "/api/meals/"+meal.id,
-        {
-          method:"DELETE"
-        }
+    const response =
+      await fetch(
+        "/api/weight?userId=" +
+        encodeURIComponent(
+          userId
+        )
+      );
+
+    const data =
+      await response.json();
+
+    if(!response.ok){
+
+      throw new Error(
+        data.error ||
+        "Ошибка загрузки веса"
       );
 
     }
 
-    await loadTodayMeals();
+    if(
+      Array.isArray(
+        data.weights
+      )
+    ){
 
-    render();
+      weightHistory =
+        data.weights.map(
+          x => ({
+
+            date:
+              String(
+                x.date
+              ).slice(0,10),
+
+            weight:
+              Number(
+                x.weight
+              )
+
+          })
+        );
+
+      saveWeights();
+
+      if(
+        weightHistory.length &&
+        profile
+      ){
+
+        profile.currentWeight =
+          Number(
+            weightHistory[
+              weightHistory.length-1
+            ].weight
+          );
+
+        saveProfile();
+
+      }
+
+      renderWeightProgress();
+
+    }
 
   }catch(error){
 
-    alert(
-      "Не удалось удалить блюдо: "+
-      error.message
+    console.error(
+      "Weight load error:",
+      error
     );
 
   }
 
 }
 
-/* =====================================================
-   MANUAL MEAL
-===================================================== */
+/* =========================
+   УДАЛЕНИЕ ЕДЫ
+========================= */
 
-async function addManualMeal(){
+function removeMeal(i){
+
+  const m =
+    day.meals[i];
+
+  if(!m)return;
+
+  day.cal -=
+    Number(
+      m.calories
+    ) || 0;
+
+  day.p -=
+    Number(
+      m.protein
+    ) || 0;
+
+  day.f -=
+    Number(
+      m.fat
+    ) || 0;
+
+  day.c -=
+    Number(
+      m.carbs
+    ) || 0;
+
+  day.meals.splice(
+    i,
+    1
+  );
+
+  render();
+
+}
+
+/* =========================
+   РУЧНАЯ ЕДА
+========================= */
+
+function addManualMeal(){
 
   const name =
     $("mName")
@@ -1786,35 +2311,28 @@ async function addManualMeal(){
       .trim();
 
   const cal =
-    Number($("mCal").value);
+    +$("mCal").value;
 
   const grams =
-    Number(
-      $("mGrams").value
-    )||0;
+    +$("mGrams").value || 0;
 
   const p =
-    Number(
-      $("mP").value
-    )||0;
+    +$("mP").value || 0;
 
   const f =
-    Number(
-      $("mF").value
-    )||0;
+    +$("mF").value || 0;
 
   const c =
-    Number(
-      $("mC").value
-    )||0;
+    +$("mC").value || 0;
 
   if(
     !name ||
     !Number.isFinite(cal) ||
-    cal<0
+    cal < 0
   ){
 
-    $("manualError").textContent =
+    $("manualError")
+      .textContent =
       "Укажи название и корректные калории.";
 
     $("manualError")
@@ -1829,719 +2347,209 @@ async function addManualMeal(){
     .classList
     .add("hidden");
 
-  try{
+  const meal = {
 
-    await api(
-      "/api/meals",
-      {
-        method:"POST",
+    name:name,
 
-        body:JSON.stringify({
+    grams:grams,
 
-          userId:Number(userId),
+    calories:cal,
 
-          date:todayKey(),
+    protein:p,
 
-          name,
+    fat:f,
 
-          grams,
+    carbs:c,
 
-          calories:cal,
+    time:
+      new Date()
+        .toLocaleTimeString(
+          [],
+          {
+            hour:"2-digit",
+            minute:"2-digit"
+          }
+        )
 
-          protein:p,
+  };
 
-          fat:f,
+  day.cal += cal;
 
-          carbs:c,
+  day.p += p;
 
-          time:
-            new Date()
-              .toLocaleTimeString(
-                [],
-                {
-                  hour:"2-digit",
-                  minute:"2-digit"
-                }
-              )
+  day.f += f;
 
-        })
+  day.c += c;
 
-      }
-    );
+  day.meals.push(
+    meal
+  );
 
-    await loadTodayMeals();
+  render();
 
-    render();
+  [
+    "mName",
+    "mCal",
+    "mP",
+    "mF",
+    "mC"
+  ].forEach(
+    id => $(id).value = ""
+  );
 
-    [
-      "mName",
-      "mCal",
-      "mP",
-      "mF",
-      "mC"
-    ].forEach(
-      id=>{
-        $(id).value="";
-      }
-    );
+  $("mGrams").value =
+    100;
 
-    $("mGrams").value=100;
-
-    showHome();
-
-  }catch(error){
-
-    $("manualError").textContent =
-      error.message;
-
-    $("manualError")
-      .classList
-      .remove("hidden");
-
-  }
+  showHome();
 
 }
 
-/* =====================================================
-   PROFILE
-===================================================== */
+/* =========================
+   ПРОФИЛЬ
+========================= */
 
-function loadProfile(){
-
-  if(!profile)return;
-
-  $("age").value =
-    profile.age ??
-    18;
-
-  $("weight").value =
-    profile.start_weight ??
-    profile.startWeight ??
-    70;
-
-  $("height").value =
-    profile.height ??
-    175;
-
-  $("targetWeight").value =
-    profile.target_weight ??
-    profile.targetWeight ??
-    "";
-
-  $("sex").value =
-    profile.sex ??
-    "male";
-
-  $("activity").value =
-    profile.activity ??
-    "1.55";
-
-  goal =
-    Number(
-      profile.calorie_goal ??
-      profile.calorieGoal ??
-      0
-    );
-
-}
-
-/* =====================================================
-   SAVE PROFILE
-===================================================== */
-
-async function saveProfileAndGoal(){
+function saveProfileAndGoal(){
 
   const age =
-    Number(
-      $("age").value
-    );
+    +$("age").value;
 
   const startWeight =
-    Number(
-      $("weight").value
-    );
+    +$("weight").value;
 
   const height =
-    Number(
-      $("height").value
-    );
+    +$("height").value;
 
   const targetWeight =
-    Number(
-      $("targetWeight").value
-    );
+    +$("targetWeight").value;
 
   const sex =
     $("sex").value;
 
   const activity =
-    Number(
-      $("activity").value
-    );
+    +$("activity").value;
 
   if(
-    age<=0 ||
-    startWeight<=0 ||
-    height<=0 ||
-    targetWeight<=0
+    age <= 0 ||
+    startWeight <= 0 ||
+    height <= 0 ||
+    targetWeight <= 0
   ){
 
-    $("goalText").textContent =
+    $("goalText")
+      .textContent =
       "Заполни все данные корректно.";
 
     return;
 
   }
 
-  let calorieGoal=0;
+  const oldProfile =
+    profile;
 
-  if(age<15){
+  profile = {
 
-    calorieGoal=0;
+    age:age,
 
-    $("goalText").textContent =
+    startWeight:
+      startWeight,
+
+    currentWeight:
+      oldProfile?.currentWeight ||
+      startWeight,
+
+    targetWeight:
+      targetWeight,
+
+    height:
+      height,
+
+    sex:
+      sex,
+
+    activity:
+      activity,
+
+    startDate:
+      oldProfile?.startDate ||
+      todayKey()
+
+  };
+
+  saveProfile();
+
+  if(
+    weightHistory.length === 0
+  ){
+
+    weightHistory.push({
+
+      date:
+        profile.startDate,
+
+      weight:
+        Number(
+          startWeight.toFixed(1)
+        )
+
+    });
+
+    saveWeights();
+
+  }
+
+  if(age < 15){
+
+    goal = 0;
+
+    localStorage.setItem(
+      "foodlens-goal",
+      "0"
+    );
+
+    $("goalText")
+      .textContent =
       "Для детей и подростков приложение не рассчитывает дефицит. Обратись к врачу/диетологу.";
 
-  }else{
-
-    const bmr =
-      10*startWeight+
-      6.25*height-
-      5*age+
-      (sex==="male"?5:-161);
-
-    const maint =
-      bmr*activity;
-
-    calorieGoal =
-      Math.round(
-        maint*.9
-      );
-
-    $("goalText").textContent =
-      `Ориентировочная поддержка: ${Math.round(maint)} ккал/день. Ориентир питания: ${calorieGoal} ккал/день.`;
-
-  }
-
-  try{
-
-    const currentWeight =
-      weightHistory.length
-        ? Number(
-            weightHistory[
-              weightHistory.length-1
-            ].weight
-          )
-        : startWeight;
-
-    const data =
-      await api(
-        "/api/user/"+userId,
-        {
-          method:"PUT",
-
-          body:JSON.stringify({
-
-            age,
-
-            sex,
-
-            startWeight,
-
-            currentWeight,
-
-            targetWeight,
-
-            height,
-
-            activity,
-
-            calorieGoal
-
-          })
-
-        }
-      );
-
-    profile =
-      data.user;
-
-    goal =
-      Number(
-        data.user.calorie_goal
-      )||0;
-
-    if(weightHistory.length===0){
-
-      await api(
-        "/api/weight",
-        {
-          method:"POST",
-
-          body:JSON.stringify({
-
-            userId:Number(userId),
-
-            date:todayKey(),
-
-            weight:
-              Number(
-                startWeight.toFixed(1)
-              )
-
-          })
-
-        }
-      );
-
-      await loadWeights();
-
-    }
-
-    loadProfile();
-
     render();
 
-  }catch(error){
-
-    $("goalText").textContent =
-      "Ошибка сохранения: "+
-      error.message;
+    return;
 
   }
 
-}
-
-/* =====================================================
-   AI PHOTO
-===================================================== */
-
-$("photo").addEventListener(
-  "change",
-  async e=>{
-
-    const file =
-      e.target.files[0];
-
-    if(!file)return;
-
-    $("preview").src =
-      URL.createObjectURL(file);
-
-    $("preview")
-      .classList
-      .remove("hidden");
-
-    $("result")
-      .classList
-      .add("hidden");
-
-    $("status").innerHTML =
-      '<div class="loading"><span class="spinner"></span>AI анализирует фото…</div>';
-
-    const fd =
-      new FormData();
-
-    fd.append(
-      "photo",
-      file
+  const bmr =
+    10*startWeight +
+    6.25*height -
+    5*age +
+    (
+      sex === "male"
+        ? 5
+        : -161
     );
 
-    try{
+  const maint =
+    bmr*activity;
 
-      const response =
-        await fetch(
-          "/api/analyze",
-          {
-            method:"POST",
-            body:fd
-          }
-        );
-
-      const d =
-        await response.json();
-
-      if(!response.ok){
-
-        throw new Error(
-          d.error ||
-          "Ошибка"
-        );
-
-      }
-
-      $("status").innerHTML="";
-
-      $("result").innerHTML = `
-
-        <h3>Что нашёл AI</h3>
-
-        ${d.items.map(
-          x=>`
-
-          <div class="item">
-
-            <div>
-
-              <b>
-                ${escapeHtml(x.name)}
-              </b>
-
-              <br>
-
-              <span class="tag">
-
-                ${Math.round(x.grams)} г
-
-                ·
-
-                ${Math.round(
-                  x.confidence*100
-                )}% уверенность
-
-              </span>
-
-            </div>
-
-            <b>
-              ${Math.round(x.calories)} ккал
-            </b>
-
-          </div>
-
-        `
-        ).join("")}
-
-        <div style="padding:14px 0">
-
-          <b>
-            Итого
-            ${Math.round(
-              d.total.calories
-            )}
-            ккал
-          </b>
-
-          <br>
-
-          <span class="small">
-
-            ${Math.round(
-              d.total.protein_g
-            )} г белка
-
-            ·
-
-            ${Math.round(
-              d.total.fat_g
-            )} г жиров
-
-            ·
-
-            ${Math.round(
-              d.total.carbs_g
-            )} г углеводов
-
-          </span>
-
-        </div>
-
-        <button
-          class="primary"
-          onclick="addMealFromAI()"
-        >
-          Добавить в дневник
-        </button>
-
-        <button
-          class="secondary"
-          onclick="document.getElementById('result').classList.add('hidden')"
-        >
-          Закрыть
-        </button>
-
-        <p class="small">
-          ${escapeHtml(
-            d.note || ""
-          )}
-        </p>
-
-      `;
-
-      window.lastAIResult = d;
-
-      $("result")
-        .classList
-        .remove("hidden");
-
-    }catch(error){
-
-      $("status").innerHTML =
-        `<div class="error">
-          Не получилось:
-          ${escapeHtml(
-            error.message
-          )}
-        </div>`;
-
-    }
-
-  }
-);
-
-/* =====================================================
-   ADD AI MEAL TO DATABASE
-===================================================== */
-
-async function addMealFromAI(){
-
-  const d =
-    window.lastAIResult;
-
-  if(!d)return;
-
-  try{
-
-    const name =
-      d.items
-        .map(
-          x=>x.name
-        )
-        .join(", ");
-
-    await api(
-      "/api/meals",
-      {
-        method:"POST",
-
-        body:JSON.stringify({
-
-          userId:Number(userId),
-
-          date:todayKey(),
-
-          name,
-
-          grams:
-            d.items.reduce(
-              (sum,x)=>
-                sum+
-                Number(x.grams||0),
-              0
-            ),
-
-          calories:
-            Number(
-              d.total.calories
-            )||0,
-
-          protein:
-            Number(
-              d.total.protein_g
-            )||0,
-
-          fat:
-            Number(
-              d.total.fat_g
-            )||0,
-
-          carbs:
-            Number(
-              d.total.carbs_g
-            )||0,
-
-          time:
-            new Date()
-              .toLocaleTimeString(
-                [],
-                {
-                  hour:"2-digit",
-                  minute:"2-digit"
-                }
-              )
-
-        })
-
-      }
+  goal =
+    Math.round(
+      maint*.9
     );
 
-    await loadTodayMeals();
-
-    render();
-
-    $("result")
-      .classList
-      .add("hidden");
-
-    $("status").innerHTML="";
-
-    $("photo").value="";
-
-  }catch(error){
-
-    $("status").innerHTML =
-      `<div class="error">
-        Не удалось сохранить блюдо:
-        ${escapeHtml(
-          error.message
-        )}
-      </div>`;
-
-  }
-
-}
-
-/* =====================================================
-   HISTORY
-===================================================== */
-
-async function showHistory(){
-
-  [
-    ...document.querySelectorAll(".card")
-  ].forEach(
-    x=>x.classList.add("hidden")
+  localStorage.setItem(
+    "foodlens-goal",
+    goal
   );
 
-  $("historyCard")
-    .classList
-    .remove("hidden");
+  $("goalText")
+    .textContent =
+    `Ориентировочная поддержка: ${Math.round(maint)} ккал/день. Ориентир питания: ${goal} ккал/день.`;
 
-  $("history").innerHTML =
-    '<div class="loading"><span class="spinner"></span>Загрузка истории…</div>';
-
-  try{
-
-    const data =
-      await api(
-        "/api/history/"+userId
-      );
-
-    let html="";
-
-    data.history.forEach(
-      item=>{
-
-        html += `
-
-          <div class="item">
-
-            <div>
-
-              <b>
-                ${escapeHtml(
-                  String(item.date)
-                )}
-              </b>
-
-              <br>
-
-              <span class="small">
-
-                ${item.meals}
-                приёмов
-
-                ·
-
-                ${Math.round(
-                  Number(item.protein)
-                )}
-                г белка
-
-              </span>
-
-            </div>
-
-            <b>
-              ${Math.round(
-                Number(item.calories)
-              )}
-              ккал
-            </b>
-
-          </div>
-
-        `;
-
-      }
-    );
-
-    if(!html){
-
-      html =
-        '<div class="empty">История пока пуста.</div>';
-
-    }
-
-    if(weightHistory.length){
-
-      html += `
-
-        <h3 style="margin:20px 0 5px">
-          ⚖️ История веса
-        </h3>
-
-        <div class="weightList">
-
-          ${
-            weightHistory
-              .slice()
-              .reverse()
-              .map(
-                x=>`
-
-                <div class="weightEntry">
-
-                  <span>
-                    ${escapeHtml(
-                      String(x.date)
-                    )}
-                  </span>
-
-                  <b>
-                    ${Number(
-                      x.weight
-                    ).toFixed(1)}
-                    кг
-                  </b>
-
-                </div>
-
-              `
-              )
-              .join("")
-          }
-
-        </div>
-
-      `;
-
-    }
-
-    $("history").innerHTML =
-      html;
-
-  }catch(error){
-
-    $("history").innerHTML =
-      `<div class="error">
-        ${escapeHtml(
-          error.message
-        )}
-      </div>`;
-
-  }
-
-  window.scrollTo({
-    top:0,
-    behavior:"smooth"
-  });
+  render();
 
 }
 
-/* =====================================================
-   NAVIGATION
-===================================================== */
+/* =========================
+   НАВИГАЦИЯ
+========================= */
 
 function showHome(){
 
@@ -2563,21 +2571,28 @@ function showHome(){
     .remove("hidden");
 
   [
-    ...document.querySelectorAll(".card")
+    ...document
+      .querySelectorAll(".card")
   ]
   .filter(
-    x=>
-      x!==$("historyCard") &&
-      x!==$("manualCard")
+    x =>
+      x !==
+        $("historyCard") &&
+      x !==
+        $("manualCard")
   )
   .forEach(
-    x=>
-      x.classList.remove("hidden")
+    x =>
+      x.classList
+        .remove("hidden")
   );
 
   window.scrollTo({
+
     top:0,
+
     behavior:"smooth"
+
   });
 
 }
@@ -2592,59 +2607,452 @@ function showAdd(){
 
   $("manualCard")
     .scrollIntoView({
+
       behavior:"smooth"
+
     });
 
 }
 
-/* =====================================================
-   START
-===================================================== */
+function showHistory(){
 
-async function startApp(){
+  [
+    ...document
+      .querySelectorAll(".card")
+  ]
+  .forEach(
+    x =>
+      x.classList
+        .add("hidden")
+  );
 
-  try{
+  $("historyCard")
+    .classList
+    .remove("hidden");
 
-    $("status").innerHTML =
-      '<div class="loading"><span class="spinner"></span>Загрузка FoodLens…</div>';
+  const dates =
+    Object.keys(
+      history
+    )
+    .sort()
+    .reverse();
 
-    await loadUser();
+  let html = "";
 
-    loadProfile();
+  dates.forEach(
+    k => {
 
-    await loadTodayMeals();
+      const d =
+        history[k] ||
+        emptyDay();
 
-    await loadWeights();
+      html += `
 
-    render();
+        <div class="item">
 
-    $("status").innerHTML="";
+          <div>
 
-  }catch(error){
+            <b>
+              ${escapeHtml(k)}
+            </b>
 
-    console.error(
-      "FoodLens startup error:",
-      error
-    );
+            <br>
 
-    $("status").innerHTML =
-      `<div class="error">
-        Не удалось загрузить данные:
-        ${escapeHtml(
-          error.message
-        )}
-      </div>`;
+            <span class="small">
+
+              ${d.meals.length}
+              приёмов
+              ·
+              ${Math.round(d.p)}
+              г белка
+
+            </span>
+
+          </div>
+
+          <b>
+
+            ${Math.round(d.cal)}
+            ккал
+
+          </b>
+
+        </div>
+
+      `;
+
+    }
+  );
+
+  $("history")
+    .innerHTML =
+      html ||
+      '<div class="empty">История пока пуста.</div>';
+
+  if(
+    weightHistory.length
+  ){
+
+    $("history")
+      .innerHTML += `
+
+        <h3
+          style="margin:20px 0 5px"
+        >
+          ⚖️ История веса
+        </h3>
+
+        <div class="weightList">
+
+          ${
+            weightHistory
+              .slice()
+              .reverse()
+              .map(
+                x => `
+
+              <div class="weightEntry">
+
+                <span>
+                  ${escapeHtml(x.date)}
+                </span>
+
+                <b>
+                  ${Number(
+                    x.weight
+                  ).toFixed(1)}
+                  кг
+                </b>
+
+              </div>
+
+            `
+              )
+              .join("")
+          }
+
+        </div>
+
+      `;
 
   }
 
+  window.scrollTo({
+
+    top:0,
+
+    behavior:"smooth"
+
+  });
+
 }
+
+/* =========================
+   AI FOOD ANALYSIS
+========================= */
+
+$("photo")
+  .addEventListener(
+    "change",
+    async e => {
+
+      const file =
+        e.target.files[0];
+
+      if(!file)return;
+
+      $("preview").src =
+        URL.createObjectURL(
+          file
+        );
+
+      $("preview")
+        .classList
+        .remove("hidden");
+
+      $("result")
+        .classList
+        .add("hidden");
+
+      $("status")
+        .innerHTML =
+        '<div class="loading"><span class="spinner"></span>AI анализирует фото…</div>';
+
+      const fd =
+        new FormData();
+
+      fd.append(
+        "photo",
+        file
+      );
+
+      try{
+
+        const r =
+          await fetch(
+            "/api/analyze",
+            {
+
+              method:"POST",
+
+              body:fd
+
+            }
+          );
+
+        const d =
+          await r.json();
+
+        if(!r.ok){
+
+          throw new Error(
+            d.error ||
+            "Ошибка"
+          );
+
+        }
+
+        $("status")
+          .innerHTML = "";
+
+        $("result")
+          .innerHTML = `
+
+          <h3>
+            Что нашёл AI
+          </h3>
+
+          ${d.items.map(
+            x => `
+
+            <div class="item">
+
+              <div>
+
+                <b>
+                  ${escapeHtml(x.name)}
+                </b>
+
+                <br>
+
+                <span class="tag">
+
+                  ${Math.round(
+                    x.grams
+                  )} г
+
+                  ·
+
+                  ${Math.round(
+                    x.confidence*100
+                  )}% уверенность
+
+                </span>
+
+              </div>
+
+              <b>
+
+                ${Math.round(
+                  x.calories
+                )}
+                ккал
+
+              </b>
+
+            </div>
+
+          `
+          ).join("")}
+
+          <div
+            style="padding:14px 0"
+          >
+
+            <b>
+
+              Итого
+              ${Math.round(
+                d.total.calories
+              )}
+              ккал
+
+            </b>
+
+            <br>
+
+            <span class="small">
+
+              ${Math.round(
+                d.total.protein_g
+              )} г белка
+
+              ·
+
+              ${Math.round(
+                d.total.fat_g
+              )} г жиров
+
+              ·
+
+              ${Math.round(
+                d.total.carbs_g
+              )} г углеводов
+
+            </span>
+
+          </div>
+
+          <button
+            class="primary"
+            onclick='addMeal(${JSON.stringify(d)})'
+          >
+            Добавить в дневник
+          </button>
+
+          <button
+            class="secondary"
+            onclick='document.getElementById("result").classList.add("hidden")'
+          >
+            Закрыть
+          </button>
+
+          <p class="small">
+
+            ${escapeHtml(
+              d.note || ""
+            )}
+
+          </p>
+
+        `;
+
+        $("result")
+          .classList
+          .remove("hidden");
+
+      }catch(err){
+
+        $("status")
+          .innerHTML =
+          `<div class="error">
+            Не получилось:
+            ${escapeHtml(
+              err.message
+            )}
+          </div>`;
+
+      }
+
+    }
+  );
+
+/* =========================
+   ДОБАВИТЬ AI БЛЮДО
+========================= */
+
+function addMeal(d){
+
+  day.cal +=
+    d.total.calories;
+
+  day.p +=
+    d.total.protein_g;
+
+  day.f +=
+    d.total.fat_g;
+
+  day.c +=
+    d.total.carbs_g;
+
+  day.meals.push({
+
+    name:
+      d.items
+        .map(
+          x => x.name
+        )
+        .join(", "),
+
+    calories:
+      d.total.calories,
+
+    protein:
+      d.total.protein_g,
+
+    fat:
+      d.total.fat_g,
+
+    carbs:
+      d.total.carbs_g,
+
+    time:
+      new Date()
+        .toLocaleTimeString(
+          [],
+          {
+            hour:"2-digit",
+            minute:"2-digit"
+          }
+        )
+
+  });
+
+  render();
+
+  $("result")
+    .classList
+    .add("hidden");
+
+  $("status")
+    .innerHTML = "";
+
+}
+
+/* =========================
+   ЗАГРУЗКА ПРОФИЛЯ
+========================= */
+
+function loadProfile(){
+
+  if(!profile)return;
+
+  $("age").value =
+    profile.age ?? 18;
+
+  $("weight").value =
+    profile.startWeight ?? 70;
+
+  $("height").value =
+    profile.height ?? 175;
+
+  $("targetWeight").value =
+    profile.targetWeight ?? "";
+
+  $("sex").value =
+    profile.sex ?? "male";
+
+  $("activity").value =
+    profile.activity ?? "1.55";
+
+}
+
+/* =========================
+   СТАРТ
+========================= */
+
+getUserId();
+
+loadProfile();
+
+render();
+
+loadWeightsFromDatabase();
 
 window.addEventListener(
   "resize",
   drawWeightChart
 );
-
-startApp();
 
 </script>
 
