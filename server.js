@@ -1,8 +1,15 @@
 import "dotenv/config";
 import express from "express";
 import multer from "multer";
+import pg from "pg";
 import path from "path";
 import { fileURLToPath } from "url";
+
+const { Pool } = pg;
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE
+});
 
 const app = express();
 
