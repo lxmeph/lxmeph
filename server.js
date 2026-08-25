@@ -1,8 +1,13 @@
 import "dotenv/config";
 import express from "express";
 import multer from "multer";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -11,9 +16,17 @@ const upload = multer({
   }
 });
 
-app.use(express.static("."));
 app.use(express.json());
 
+// Раздаём файлы сайта
+app.use(express.static(__dirname));
+
+// Главная страница
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+// AI-анализ фотографии
 app.post("/api/analyze", upload.single("photo"), async (req, res) => {
   try {
     if (!process.env.OPENROUTER_API_KEY) {
@@ -121,14 +134,11 @@ confidence должен быть числом от 0 до 1.
 
     text = text.trim();
 
-    // Убираем markdown, если AI всё-таки его добавил
     if (text.startsWith("```")) {
       text = text.replace(/^```(?:json)?\s*/i, "");
       text = text.replace(/\s*```\s*$/i, "");
     }
 
-    // Иногда модель добавляет лишний текст вокруг JSON.
-    // Берём только содержимое от первой { до последней }.
     const firstBrace = text.indexOf("{");
     const lastBrace = text.lastIndexOf("}");
 
@@ -151,6 +161,7 @@ confidence должен быть числом от 0 до 1.
   }
 });
 
+// Проверка сервера
 app.get("/api/health", (req, res) => {
   res.json({
     ok: true
