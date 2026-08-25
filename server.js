@@ -7,7 +7,9 @@ const app = express();
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 8 * 1024 * 1024 }
+  limits: {
+    fileSize: 8 * 1024 * 1024
+  }
 });
 
 const ai = new GoogleGenAI({
@@ -37,22 +39,17 @@ app.post("/api/analyze", upload.single("photo"), async (req, res) => {
     const prompt = `
 Ты AI-ассистент приложения FoodLens.
 
-Проанализируй ТОЛЬКО еду, которую видно на фотографии.
-
-Определи приблизительно:
-- какие продукты или блюда видны;
-- примерный вес каждого продукта в граммах;
+Посмотри на фотографию еды и оцени:
+- продукты;
+- примерный вес каждого продукта;
 - калории;
 - белки;
 - жиры;
 - углеводы.
 
 Не создавай ложную точность.
-Если вес невозможно определить точно, оцени приблизительно.
 
-Верни ТОЛЬКО JSON, без markdown и без ```.
-
-Формат:
+Верни ТОЛЬКО JSON:
 
 {
   "items": [
@@ -75,7 +72,7 @@ app.post("/api/analyze", upload.single("photo"), async (req, res) => {
   "note": "краткая оговорка об оценке"
 }
 
-confidence должен быть числом от 0 до 1.
+confidence должен быть от 0 до 1.
 `;
 
     const response = await ai.models.generateContent({
@@ -83,7 +80,7 @@ confidence должен быть числом от 0 до 1.
       contents: [
         {
           inlineData: {
-            mimeType,
+            mimeType: mimeType,
             data: base64Image
           }
         },
@@ -115,7 +112,9 @@ confidence должен быть числом от 0 до 1.
 });
 
 app.get("/api/health", (req, res) => {
-  res.json({ ok: true });
+  res.json({
+    ok: true
+  });
 });
 
 const PORT = process.env.PORT || 3000;
