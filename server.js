@@ -16,10 +16,6 @@ const __dirname = path.dirname(__filename);
    POSTGRESQL
 ========================= */
 
-if (!process.env.DATABASE) {
-  console.error("DATABASE не найден в Environment Variables");
-}
-
 const pool = new Pool({
   connectionString: process.env.DATABASE,
   ssl: {
@@ -28,64 +24,19 @@ const pool = new Pool({
 });
 
 /* =========================
-   UPLOAD
-========================= */
-
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 8 * 1024 * 1024
-  }
-});
-
-app.use(express.json());
-
-/* =========================
-   DATABASE INIT
+   СОЗДАНИЕ ТАБЛИЦЫ
 ========================= */
 
 async function initDatabase() {
   try {
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS users (
+      CREATE TABLE IF NOT EXISTS weight_entries (
         id SERIAL PRIMARY KEY,
-        age INTEGER,
-        sex VARCHAR(20),
-        start_weight NUMERIC(6,2),
-        current_weight NUMERIC(6,2),
-        target_weight NUMERIC(6,2),
-        height NUMERIC(6,2),
-        activity NUMERIC(5,3),
-        calorie_goal INTEGER,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS meals (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        meal_date DATE NOT NULL,
-        name TEXT NOT NULL,
-        grams NUMERIC(8,2) DEFAULT 0,
-        calories NUMERIC(10,2) DEFAULT 0,
-        protein NUMERIC(10,2) DEFAULT 0,
-        fat NUMERIC(10,2) DEFAULT 0,
-        carbs NUMERIC(10,2) DEFAULT 0,
-        meal_time VARCHAR(10),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS weight_history (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        weight_date DATE NOT NULL,
+        user_id TEXT NOT NULL,
+        date DATE NOT NULL,
         weight NUMERIC(6,2) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(user_id, weight_date)
+        UNIQUE(user_id, date)
       );
     `);
 
@@ -100,443 +51,208 @@ async function initDatabase() {
 initDatabase();
 
 /* =========================
-   STATIC FILES
+   MULTER
 ========================= */
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 8 * 1024 * 1024
+  }
+});
+
+/* =========================
+   EXPRESS
+========================= */
+
+app.use(express.json());
 
 app.use(express.static(__dirname));
 
+/* =========================
+   ГЛАВНАЯ
+========================= */
+
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(
+    path.join(__dirname, "index.html")
+  );
 });
 
 /* =========================
-   USER
+   HEALTH
 ========================= */
 
-app.post("/api/user", async (req, res) => {
-  try {
-    const {
-      age,
-      sex,
-      startWeight,
-      currentWeight,
-      targetWeight,
-      height,
-      activity,
-      calorieGoal
-    } = req.body;
+app.get("/api/health", async (req, res) => {
 
-    const result = await pool.query(
-      `
-      INSERT INTO users (
-        age,
-        sex,
-        start_weight,
-        current_weight,
-        target_weight,
-        height,
-        activity,
-        calorie_goal
-      )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-      RETURNING *
-      `,
-      [
-        age,
-        sex,
-        startWeight,
-        currentWeight,
-        targetWeight,
-        height,
-        activity,
-        calorieGoal
-      ]
-    );
+  try {
+
+    await pool.query("SELECT NOW()");
 
     res.json({
       ok: true,
-      user: result.rows[0]
+      database: true
     });
 
   } catch (error) {
-    console.error("Create user error:", error);
+
+    console.error(error);
 
     res.status(500).json({
-      error: "Не удалось сохранить профиль"
+      ok: false,
+      database: false,
+      error: error.message
     });
+
   }
+
 });
 
 /* =========================
-   GET USER
-========================= */
-
-app.get("/api/user/:id", async (req, res) => {
-  try {
-    const id = Number(req.params.id);
-
-    const result = await pool.query(
-      `
-      SELECT *
-      FROM users
-      WHERE id = $1
-      `,
-      [id]
-    );
-
-    if (!result.rows.length) {
-      return res.status(404).json({
-        error: "Пользователь не найден"
-      });
-    }
-
-    res.json(result.rows[0]);
-
-  } catch (error) {
-    console.error("Get user error:", error);
-
-    res.status(500).json({
-      error: "Ошибка получения пользователя"
-    });
-  }
-});
-
-/* =========================
-   UPDATE USER
-========================= */
-
-app.put("/api/user/:id", async (req, res) => {
-  try {
-    const id = Number(req.params.id);
-
-    const {
-      age,
-      sex,
-      startWeight,
-      currentWeight,
-      targetWeight,
-      height,
-      activity,
-      calorieGoal
-    } = req.body;
-
-    const result = await pool.query(
-      `
-      UPDATE users
-      SET
-        age = $1,
-        sex = $2,
-        start_weight = $3,
-        current_weight = $4,
-        target_weight = $5,
-        height = $6,
-        activity = $7,
-        calorie_goal = $8,
-        updated_at = CURRENT_TIMESTAMP
-      WHERE id = $9
-      RETURNING *
-      `,
-      [
-        age,
-        sex,
-        startWeight,
-        currentWeight,
-        targetWeight,
-        height,
-        activity,
-        calorieGoal,
-        id
-      ]
-    );
-
-    if (!result.rows.length) {
-      return res.status(404).json({
-        error: "Пользователь не найден"
-      });
-    }
-
-    res.json({
-      ok: true,
-      user: result.rows[0]
-    });
-
-  } catch (error) {
-    console.error("Update user error:", error);
-
-    res.status(500).json({
-      error: "Не удалось обновить профиль"
-    });
-  }
-});
-
-/* =========================
-   ADD MEAL
-========================= */
-
-app.post("/api/meals", async (req, res) => {
-  try {
-    const {
-      userId,
-      date,
-      name,
-      grams,
-      calories,
-      protein,
-      fat,
-      carbs,
-      time
-    } = req.body;
-
-    if (!userId || !name) {
-      return res.status(400).json({
-        error: "Не хватает данных"
-      });
-    }
-
-    const result = await pool.query(
-      `
-      INSERT INTO meals (
-        user_id,
-        meal_date,
-        name,
-        grams,
-        calories,
-        protein,
-        fat,
-        carbs,
-        meal_time
-      )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-      RETURNING *
-      `,
-      [
-        userId,
-        date,
-        name,
-        grams || 0,
-        calories || 0,
-        protein || 0,
-        fat || 0,
-        carbs || 0,
-        time || null
-      ]
-    );
-
-    res.json({
-      ok: true,
-      meal: result.rows[0]
-    });
-
-  } catch (error) {
-    console.error("Add meal error:", error);
-
-    res.status(500).json({
-      error: "Не удалось сохранить блюдо"
-    });
-  }
-});
-
-/* =========================
-   GET MEALS
-========================= */
-
-app.get("/api/meals/:userId/:date", async (req, res) => {
-  try {
-    const userId = Number(req.params.userId);
-    const date = req.params.date;
-
-    const result = await pool.query(
-      `
-      SELECT *
-      FROM meals
-      WHERE user_id = $1
-      AND meal_date = $2
-      ORDER BY created_at ASC
-      `,
-      [userId, date]
-    );
-
-    res.json({
-      meals: result.rows
-    });
-
-  } catch (error) {
-    console.error("Get meals error:", error);
-
-    res.status(500).json({
-      error: "Не удалось получить блюда"
-    });
-  }
-});
-
-/* =========================
-   DELETE MEAL
-========================= */
-
-app.delete("/api/meals/:id", async (req, res) => {
-  try {
-    const id = Number(req.params.id);
-
-    await pool.query(
-      `
-      DELETE FROM meals
-      WHERE id = $1
-      `,
-      [id]
-    );
-
-    res.json({
-      ok: true
-    });
-
-  } catch (error) {
-    console.error("Delete meal error:", error);
-
-    res.status(500).json({
-      error: "Не удалось удалить блюдо"
-    });
-  }
-});
-
-/* =========================
-   WEIGHT
+   СОХРАНИТЬ ВЕС
 ========================= */
 
 app.post("/api/weight", async (req, res) => {
+
   try {
+
     const {
       userId,
       date,
       weight
     } = req.body;
 
-    if (!userId || !date || !weight) {
+    if (!userId) {
+
       return res.status(400).json({
-        error: "Не хватает данных"
+        error: "userId не указан"
       });
+
+    }
+
+    if (!date) {
+
+      return res.status(400).json({
+        error: "date не указана"
+      });
+
+    }
+
+    const numericWeight = Number(weight);
+
+    if (
+      !Number.isFinite(numericWeight) ||
+      numericWeight <= 0 ||
+      numericWeight > 500
+    ) {
+
+      return res.status(400).json({
+        error: "Некорректный вес"
+      });
+
     }
 
     const result = await pool.query(
       `
-      INSERT INTO weight_history (
-        user_id,
-        weight_date,
-        weight
-      )
-      VALUES ($1,$2,$3)
-      ON CONFLICT (user_id, weight_date)
+      INSERT INTO weight_entries
+        (user_id, date, weight)
+      VALUES
+        ($1, $2, $3)
+      ON CONFLICT (user_id, date)
       DO UPDATE SET
         weight = EXCLUDED.weight
-      RETURNING *
-      `,
-      [
-        userId,
+      RETURNING
+        id,
+        user_id,
         date,
         weight
-      ]
-    );
-
-    await pool.query(
-      `
-      UPDATE users
-      SET
-        current_weight = $1,
-        updated_at = CURRENT_TIMESTAMP
-      WHERE id = $2
       `,
       [
-        weight,
-        userId
+        String(userId),
+        date,
+        numericWeight
       ]
     );
 
     res.json({
       ok: true,
-      weight: result.rows[0]
+      entry: result.rows[0]
     });
 
   } catch (error) {
-    console.error("Save weight error:", error);
+
+    console.error(
+      "Weight save error:",
+      error
+    );
 
     res.status(500).json({
-      error: "Не удалось сохранить вес"
+      error:
+        error.message ||
+        "Ошибка сохранения веса"
     });
+
   }
+
 });
 
 /* =========================
-   GET WEIGHT HISTORY
+   ПОЛУЧИТЬ ВЕС
 ========================= */
 
-app.get("/api/weight/:userId", async (req, res) => {
+app.get("/api/weight", async (req, res) => {
+
   try {
-    const userId = Number(req.params.userId);
+
+    const userId =
+      String(req.query.userId || "");
+
+    if (!userId) {
+
+      return res.status(400).json({
+        error: "userId не указан"
+      });
+
+    }
 
     const result = await pool.query(
       `
       SELECT
-        weight_date AS date,
+        id,
+        user_id,
+        date,
         weight
-      FROM weight_history
+      FROM weight_entries
       WHERE user_id = $1
-      ORDER BY weight_date ASC
+      ORDER BY date ASC
       `,
       [userId]
     );
 
     res.json({
+      ok: true,
       weights: result.rows
     });
 
   } catch (error) {
-    console.error("Get weight history error:", error);
 
-    res.status(500).json({
-      error: "Не удалось получить историю веса"
-    });
-  }
-});
-
-/* =========================
-   HISTORY
-========================= */
-
-app.get("/api/history/:userId", async (req, res) => {
-  try {
-    const userId = Number(req.params.userId);
-
-    const result = await pool.query(
-      `
-      SELECT
-        meal_date AS date,
-        COUNT(*) AS meals,
-        COALESCE(SUM(calories),0) AS calories,
-        COALESCE(SUM(protein),0) AS protein,
-        COALESCE(SUM(fat),0) AS fat,
-        COALESCE(SUM(carbs),0) AS carbs
-      FROM meals
-      WHERE user_id = $1
-      GROUP BY meal_date
-      ORDER BY meal_date DESC
-      `,
-      [userId]
+    console.error(
+      "Weight load error:",
+      error
     );
 
-    res.json({
-      history: result.rows
-    });
-
-  } catch (error) {
-    console.error("History error:", error);
-
     res.status(500).json({
-      error: "Не удалось получить историю"
+      error:
+        error.message ||
+        "Ошибка загрузки веса"
     });
+
   }
+
 });
 
 /* =========================
-   AI FOOD ANALYSIS
+   AI АНАЛИЗ ФОТО
 ========================= */
 
 app.post(
@@ -547,15 +263,20 @@ app.post(
     try {
 
       if (!process.env.OPENROUTER_API_KEY) {
+
         return res.status(500).json({
-          error: "OPENROUTER_API_KEY не найден в Render"
+          error:
+            "OPENROUTER_API_KEY не найден в Render"
         });
+
       }
 
       if (!req.file) {
+
         return res.status(400).json({
           error: "Фото не загружено"
         });
+
       }
 
       const image =
@@ -610,17 +331,24 @@ confidence должен быть числом от 0 до 1.
 `;
 
       const requestBody = {
+
         model: "openrouter/free",
+
         messages: [
+
           {
             role: "user",
+
             content: [
+
               {
                 type: "text",
                 text: prompt
               },
+
               {
                 type: "image_url",
+
                 image_url: {
                   url:
                     "data:" +
@@ -628,10 +356,15 @@ confidence должен быть числом от 0 до 1.
                     ";base64," +
                     image
                 }
+
               }
+
             ]
+
           }
+
         ]
+
       };
 
       const response = await fetch(
@@ -658,13 +391,15 @@ confidence должен быть числом от 0 до 1.
 
       if (!response.ok) {
 
-        return res
-          .status(response.status)
-          .json({
-            error:
-              result?.error?.message ||
-              "Ошибка OpenRouter"
-          });
+        return res.status(
+          response.status
+        ).json({
+
+          error:
+            result?.error?.message ||
+            "Ошибка OpenRouter"
+
+        });
 
       }
 
@@ -672,19 +407,21 @@ confidence должен быть числом от 0 до 1.
         result?.choices?.[0]?.message?.content ||
         "";
 
-      text=text.trim();
+      text = text.trim();
 
-      if(text.startsWith("```")){
+      if (text.startsWith("```")) {
 
-        text=text.replace(
-          /^```(?:json)?\s*/i,
-          ""
-        );
+        text =
+          text.replace(
+            /^```(?:json)?\s*/i,
+            ""
+          );
 
-        text=text.replace(
-          /\s*```\s*$/i,
-          ""
-        );
+        text =
+          text.replace(
+            /\s*```\s*$/i,
+            ""
+          );
 
       }
 
@@ -694,10 +431,10 @@ confidence должен быть числом от 0 до 1.
       const lastBrace =
         text.lastIndexOf("}");
 
-      if(
-        firstBrace===-1 ||
-        lastBrace===-1
-      ){
+      if (
+        firstBrace === -1 ||
+        lastBrace === -1
+      ) {
 
         throw new Error(
           "AI не вернул JSON"
@@ -705,28 +442,30 @@ confidence должен быть числом от 0 до 1.
 
       }
 
-      text=
+      text =
         text.slice(
           firstBrace,
-          lastBrace+1
+          lastBrace + 1
         );
 
-      const data=
+      const data =
         JSON.parse(text);
 
       res.json(data);
 
-    } catch(error){
+    } catch (error) {
 
       console.error(
-        "FoodLens AI error:",
+        "FoodLens error:",
         error
       );
 
       res.status(500).json({
+
         error:
           error.message ||
           "AI не смог обработать фото"
+
       });
 
     }
@@ -735,38 +474,7 @@ confidence должен быть числом от 0 до 1.
 );
 
 /* =========================
-   HEALTH CHECK
-========================= */
-
-app.get("/api/health", async (req, res) => {
-
-  try {
-
-    const result =
-      await pool.query(
-        "SELECT NOW()"
-      );
-
-    res.json({
-      ok:true,
-      database:true,
-      time:result.rows[0].now
-    });
-
-  } catch(error){
-
-    res.status(500).json({
-      ok:false,
-      database:false,
-      error:error.message
-    });
-
-  }
-
-});
-
-/* =========================
-   SERVER
+   ЗАПУСК
 ========================= */
 
 const PORT =
