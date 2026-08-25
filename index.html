@@ -1,158 +1,1987 @@
 <!doctype html>
-<html lang="ru"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#101418"><title>FoodLens</title>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101418">
+<title>FoodLens</title>
+
 <style>
-:root{--bg:#f3f5f2;--card:#fff;--ink:#111719;--muted:#7b8582;--line:#e6e9e7;--accent:#b9e769;--accent2:#dff5b5;--danger:#c94c4c}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.app{max-width:520px;margin:auto;min-height:100vh;padding:18px 16px 104px}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.logo{font-weight:900;font-size:25px;letter-spacing:-1px}.avatar{width:42px;height:42px;border-radius:50%;background:#e8ece8;display:grid;place-items:center}
-.hero{background:var(--ink);color:white;border-radius:28px;padding:22px;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:190px;height:190px;border-radius:50%;right:-80px;top:-80px;background:var(--accent);opacity:.9}
-.hero>*{position:relative;z-index:1}.hello{color:#c7cecb;font-size:14px}.hero h1{font-size:34px;line-height:1;margin:8px 0}.hero p{color:#aeb8b4;margin:0}.heroStats{display:flex;gap:8px;margin-top:22px}.pill{background:#242b2b;border-radius:15px;padding:11px 13px;flex:1}.pill b{display:block;font-size:18px}.pill span{font-size:11px;color:#aeb8b4}
-.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:18px;margin-top:14px}.row{display:flex;justify-content:space-between;align-items:center;gap:12px}.title{font-size:18px;font-weight:800;margin:0}.muted{color:var(--muted)}.progress{height:12px;background:#e9ece9;border-radius:10px;overflow:hidden;margin:14px 0}.bar{height:100%;background:var(--accent);width:0;border-radius:10px}.big{font-size:34px;font-weight:900;letter-spacing:-1px}.small{font-size:12px;color:var(--muted)}
-.macros{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}.macro{background:#f5f7f4;border-radius:15px;padding:12px}.macro b{font-size:19px}.macro small{display:block;color:var(--muted)}
-.camera{margin-top:14px;border:1.5px dashed #c5cbc7;border-radius:21px;padding:18px;text-align:center;background:#fafcf9}.cameraIcon{font-size:42px}.upload{display:block;background:var(--ink);color:white;padding:14px;border-radius:15px;font-weight:800;cursor:pointer}.upload input{display:none}
-.preview{width:100%;max-height:300px;object-fit:cover;border-radius:18px;margin-top:14px}.loading{padding:18px;text-align:center;color:var(--muted)}.spinner{display:inline-block;width:20px;height:20px;border:3px solid #ddd;border-top-color:#111;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:8px}@keyframes spin{to{transform:rotate(360deg)}}
-.item{display:flex;justify-content:space-between;gap:10px;padding:13px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}.item b{white-space:nowrap}.tag{display:inline-block;background:var(--accent2);padding:4px 8px;border-radius:8px;font-size:11px;margin-top:4px}
-button{border:0;border-radius:15px;padding:13px 16px;font-weight:800;cursor:pointer}.primary{width:100%;background:var(--ink);color:#fff}.secondary{background:#eef1ee;color:var(--ink);width:100%;margin-top:8px}
-.formGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}input,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;font-size:16px;background:#fff}label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}.hidden{display:none}.error{color:var(--danger);background:#fff1f1;padding:12px;border-radius:12px;font-size:13px}
-.diaryDate{font-weight:800;margin:14px 0 6px}.empty{color:var(--muted);text-align:center;padding:20px}
-.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);padding:10px 10px 12px;z-index:10}.nav div{text-align:center;font-size:11px;color:var(--muted)}.nav b{display:block;font-size:21px;margin-bottom:2px}
-</style></head>
-<body><main class="app">
-<header class="top"><div class="logo">FoodLens<span style="color:#8eb84d">.</span></div><div class="avatar">🙂</div></header>
+:root{
+  --bg:#f3f5f2;
+  --card:#fff;
+  --ink:#111719;
+  --muted:#7b8582;
+  --line:#e6e9e7;
+  --accent:#b9e769;
+  --accent2:#dff5b5;
+  --danger:#c94c4c;
+}
 
-<section class="hero"><div class="hello">Сегодня</div><h1 id="heroCal">0 ккал</h1><p>ориентир <span id="heroGoal">—</span> ккал</p>
-<div class="heroStats"><div class="pill"><b id="heroLeft">—</b><span>осталось</span></div><div class="pill"><b id="heroP">0 г</b><span>белка</span></div><div class="pill"><b id="heroMeals">0</b><span>приёмов</span></div></div></section>
+*{box-sizing:border-box}
 
-<section class="card"><div class="row"><h2 class="title">Прогресс дня</h2><b id="percent">0%</b></div><div class="progress"><div class="bar" id="bar"></div></div>
-<div class="macros"><div class="macro"><b id="p">0</b><small>Белки, г</small></div><div class="macro"><b id="f">0</b><small>Жиры, г</small></div><div class="macro"><b id="c">0</b><small>Углеводы, г</small></div></div></section>
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
+}
 
-<section class="card"><div class="row"><h2 class="title">✨ Добавить еду</h2><span class="small">AI Vision</span></div>
-<div class="camera"><div class="cameraIcon">📸</div><h3>Сфотографируй блюдо</h3><p class="muted">AI определит продукты, примерную порцию и калории.</p>
-<label class="upload">Выбрать фото / открыть камеру<input id="photo" type="file" accept="image/*" capture="environment"></label></div>
-<div id="status"></div><img id="preview" class="preview hidden"><div id="result" class="hidden"></div></section>
+.app{
+  max-width:520px;
+  margin:auto;
+  min-height:100vh;
+  padding:18px 16px 104px
+}
 
-<section class="card"><div class="row"><h2 class="title">🎯 Твоя цель</h2></div>
-<div class="formGrid" style="margin-top:12px"><div><label>Возраст</label><input id="age" type="number" value="18"></div><div><label>Пол</label><select id="sex"><option value="male">Мужской</option><option value="female">Женский</option></select></div><div><label>Вес, кг</label><input id="weight" type="number" value="70"></div><div><label>Рост, см</label><input id="height" type="number" value="175"></div></div>
-<label style="margin-top:8px">Активность</label><select id="activity"><option value="1.2">Минимальная</option><option value="1.375">Лёгкая</option><option value="1.55" selected>Средняя</option><option value="1.725">Высокая</option></select>
-<button class="primary" onclick="calcGoal()">Рассчитать ориентир</button><p id="goalText" class="small"></p></section>
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px
+}
 
-<section class="card"><div class="row"><h2 class="title">📖 Сегодня</h2><span class="small" id="mealCount">0</span></div>
-<div id="diary"><div class="empty">Добавь первое блюдо 📸</div></div></section>
+.logo{
+  font-weight:900;
+  font-size:25px;
+  letter-spacing:-1px
+}
 
-<section class="card hidden" id="historyCard">
-  <div class="row"><h2 class="title">🗓 История</h2><button class="secondary" style="width:auto;margin:0" onclick="showHome()">Главная</button></div>
-  <div id="history"></div>
-</section>
+.avatar{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:#e8ece8;
+  display:grid;
+  place-items:center
+}
 
-<section class="card hidden" id="manualCard">
-  <div class="row"><h2 class="title">✍️ Добавить вручную</h2><button class="secondary" style="width:auto;margin:0" onclick="showHome()">Закрыть</button></div>
-  <div style="margin-top:12px"><label>Название блюда</label><input id="mName" placeholder="Например, овсянка"></div>
-  <div class="formGrid" style="margin-top:8px">
-    <div><label>Калории, ккал</label><input id="mCal" type="number" min="0" step="1"></div>
-    <div><label>Порция, г</label><input id="mGrams" type="number" min="0" step="1" value="100"></div>
-    <div><label>Белки, г</label><input id="mP" type="number" min="0" step="0.1"></div>
-    <div><label>Жиры, г</label><input id="mF" type="number" min="0" step="0.1"></div>
-    <div><label>Углеводы, г</label><input id="mC" type="number" min="0" step="0.1"></div>
+.hero{
+  background:var(--ink);
+  color:white;
+  border-radius:28px;
+  padding:22px;
+  position:relative;
+  overflow:hidden
+}
+
+.hero:after{
+  content:"";
+  position:absolute;
+  width:190px;
+  height:190px;
+  border-radius:50%;
+  right:-80px;
+  top:-80px;
+  background:var(--accent);
+  opacity:.9
+}
+
+.hero>*{
+  position:relative;
+  z-index:1
+}
+
+.hello{
+  color:#c7cecb;
+  font-size:14px
+}
+
+.hero h1{
+  font-size:34px;
+  line-height:1;
+  margin:8px 0
+}
+
+.hero p{
+  color:#aeb8b4;
+  margin:0
+}
+
+.heroStats{
+  display:flex;
+  gap:8px;
+  margin-top:22px
+}
+
+.pill{
+  background:#242b2b;
+  border-radius:15px;
+  padding:11px 13px;
+  flex:1
+}
+
+.pill b{
+  display:block;
+  font-size:18px
+}
+
+.pill span{
+  font-size:11px;
+  color:#aeb8b4
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:18px;
+  margin-top:14px
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px
+}
+
+.title{
+  font-size:18px;
+  font-weight:800;
+  margin:0
+}
+
+.muted{
+  color:var(--muted)
+}
+
+.progress{
+  height:12px;
+  background:#e9ece9;
+  border-radius:10px;
+  overflow:hidden;
+  margin:14px 0
+}
+
+.bar{
+  height:100%;
+  background:var(--accent);
+  width:0;
+  border-radius:10px;
+  transition:width .4s ease
+}
+
+.big{
+  font-size:34px;
+  font-weight:900;
+  letter-spacing:-1px
+}
+
+.small{
+  font-size:12px;
+  color:var(--muted)
+}
+
+.macros{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-top:14px
+}
+
+.macro{
+  background:#f5f7f4;
+  border-radius:15px;
+  padding:12px
+}
+
+.macro b{
+  font-size:19px
+}
+
+.macro small{
+  display:block;
+  color:var(--muted)
+}
+
+.camera{
+  margin-top:14px;
+  border:1.5px dashed #c5cbc7;
+  border-radius:21px;
+  padding:18px;
+  text-align:center;
+  background:#fafcf9
+}
+
+.cameraIcon{
+  font-size:42px
+}
+
+.upload{
+  display:block;
+  background:var(--ink);
+  color:white;
+  padding:14px;
+  border-radius:15px;
+  font-weight:800;
+  cursor:pointer
+}
+
+.upload input{
+  display:none
+}
+
+.preview{
+  width:100%;
+  max-height:300px;
+  object-fit:cover;
+  border-radius:18px;
+  margin-top:14px
+}
+
+.loading{
+  padding:18px;
+  text-align:center;
+  color:var(--muted)
+}
+
+.spinner{
+  display:inline-block;
+  width:20px;
+  height:20px;
+  border:3px solid #ddd;
+  border-top-color:#111;
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+  vertical-align:middle;
+  margin-right:8px
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+.item{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:13px 0;
+  border-bottom:1px solid var(--line)
+}
+
+.item:last-child{
+  border-bottom:0
+}
+
+.item b{
+  white-space:nowrap
+}
+
+.tag{
+  display:inline-block;
+  background:var(--accent2);
+  padding:4px 8px;
+  border-radius:8px;
+  font-size:11px;
+  margin-top:4px
+}
+
+button{
+  border:0;
+  border-radius:15px;
+  padding:13px 16px;
+  font-weight:800;
+  cursor:pointer
+}
+
+.primary{
+  width:100%;
+  background:var(--ink);
+  color:#fff
+}
+
+.secondary{
+  background:#eef1ee;
+  color:var(--ink);
+  width:100%;
+  margin-top:8px
+}
+
+.formGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px
+}
+
+input,select{
+  width:100%;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  font-size:16px;
+  background:#fff
+}
+
+label{
+  font-size:12px;
+  color:var(--muted);
+  display:block;
+  margin-bottom:4px
+}
+
+.hidden{
+  display:none!important
+}
+
+.error{
+  color:var(--danger);
+  background:#fff1f1;
+  padding:12px;
+  border-radius:12px;
+  font-size:13px
+}
+
+.diaryDate{
+  font-weight:800;
+  margin:14px 0 6px
+}
+
+.empty{
+  color:var(--muted);
+  text-align:center;
+  padding:20px
+}
+
+.goalBox{
+  background:#f5f7f4;
+  border-radius:18px;
+  padding:15px;
+  margin-top:12px
+}
+
+.goalNumbers{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+  text-align:center
+}
+
+.goalNumber{
+  background:#fff;
+  border-radius:14px;
+  padding:11px 6px
+}
+
+.goalNumber b{
+  display:block;
+  font-size:20px
+}
+
+.goalNumber span{
+  font-size:10px;
+  color:var(--muted)
+}
+
+.chartWrap{
+  margin-top:14px;
+  background:#f7f9f6;
+  border-radius:18px;
+  padding:10px;
+  overflow:hidden
+}
+
+#weightChart{
+  width:100%;
+  height:220px;
+  display:block
+}
+
+.weightList{
+  margin-top:8px
+}
+
+.weightEntry{
+  display:flex;
+  justify-content:space-between;
+  padding:10px 0;
+  border-bottom:1px solid var(--line)
+}
+
+.weightEntry:last-child{
+  border-bottom:0
+}
+
+.badge{
+  display:inline-block;
+  background:var(--accent2);
+  padding:5px 8px;
+  border-radius:9px;
+  font-size:11px;
+  font-weight:700
+}
+
+.nav{
+  position:fixed;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(520px,100%);
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  padding:10px 10px 12px;
+  z-index:10
+}
+
+.nav div{
+  text-align:center;
+  font-size:11px;
+  color:var(--muted)
+}
+
+.nav b{
+  display:block;
+  font-size:21px;
+  margin-bottom:2px
+}
+</style>
+</head>
+
+<body>
+
+<main class="app">
+
+<header class="top">
+  <div class="logo">FoodLens<span style="color:#8eb84d">.</span></div>
+  <div class="avatar">🙂</div>
+</header>
+
+<!-- ГЛАВНЫЙ БЛОК -->
+<section class="hero">
+
+  <div class="hello">Сегодня</div>
+
+  <h1 id="heroCal">0 ккал</h1>
+
+  <p>
+    ориентир <span id="heroGoal">—</span> ккал
+  </p>
+
+  <div class="heroStats">
+
+    <div class="pill">
+      <b id="heroLeft">—</b>
+      <span>осталось</span>
+    </div>
+
+    <div class="pill">
+      <b id="heroP">0 г</b>
+      <span>белка</span>
+    </div>
+
+    <div class="pill">
+      <b id="heroMeals">0</b>
+      <span>приёмов</span>
+    </div>
+
   </div>
-  <button class="primary" style="margin-top:12px" onclick="addManualMeal()">Добавить в дневник</button>
-  <p id="manualError" class="error hidden"></p>
+
 </section>
-<p class="small" style="padding:4px 4px">Важно: калории и масса по фотографии — приблизительная оценка, а не медицинское измерение.</p>
+
+<!-- ПРОГРЕСС ДНЯ -->
+<section class="card">
+
+  <div class="row">
+    <h2 class="title">Прогресс дня</h2>
+    <b id="percent">0%</b>
+  </div>
+
+  <div class="progress">
+    <div class="bar" id="bar"></div>
+  </div>
+
+  <div class="macros">
+
+    <div class="macro">
+      <b id="p">0</b>
+      <small>Белки, г</small>
+    </div>
+
+    <div class="macro">
+      <b id="f">0</b>
+      <small>Жиры, г</small>
+    </div>
+
+    <div class="macro">
+      <b id="c">0</b>
+      <small>Углеводы, г</small>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- ПРОГРЕСС ВЕСА -->
+<section class="card">
+
+  <div class="row">
+    <h2 class="title">🎯 Прогресс веса</h2>
+    <span class="badge" id="weightProgressPercent">0%</span>
+  </div>
+
+  <div class="goalBox">
+
+    <div class="goalNumbers">
+
+      <div class="goalNumber">
+        <b id="startWeightDisplay">—</b>
+        <span>Начальный вес</span>
+      </div>
+
+      <div class="goalNumber">
+        <b id="currentWeightDisplay">—</b>
+        <span>Сейчас</span>
+      </div>
+
+      <div class="goalNumber">
+        <b id="targetWeightDisplay">—</b>
+        <span>Цель</span>
+      </div>
+
+    </div>
+
+    <div class="progress">
+      <div class="bar" id="weightBar"></div>
+    </div>
+
+    <div class="row">
+      <span class="small" id="weightLostText">—</span>
+      <span class="small" id="weightRemainingText">—</span>
+    </div>
+
+  </div>
+
+  <div class="chartWrap">
+    <canvas id="weightChart"></canvas>
+  </div>
+
+  <button class="primary" style="margin-top:12px" onclick="showWeightForm()">
+    ⚖️ Записать сегодняшний вес
+  </button>
+
+</section>
+
+<!-- ФОРМА ВЕСА -->
+<section class="card hidden" id="weightFormCard">
+
+  <div class="row">
+    <h2 class="title">⚖️ Новое взвешивание</h2>
+    <button class="secondary" style="width:auto;margin:0" onclick="hideWeightForm()">Закрыть</button>
+  </div>
+
+  <div style="margin-top:12px">
+
+    <label>Вес сегодня, кг</label>
+
+    <input
+      id="newWeight"
+      type="number"
+      inputmode="decimal"
+      step="0.1"
+      min="1"
+      placeholder="Например, 85.4"
+    >
+
+  </div>
+
+  <button class="primary" style="margin-top:12px" onclick="saveWeight()">
+    Сохранить вес
+  </button>
+
+  <p id="weightError" class="error hidden"></p>
+
+</section>
+
+<!-- ДОБАВЛЕНИЕ ЕДЫ -->
+<section class="card">
+
+  <div class="row">
+    <h2 class="title">✨ Добавить еду</h2>
+    <span class="small">AI Vision</span>
+  </div>
+
+  <div class="camera">
+
+    <div class="cameraIcon">📸</div>
+
+    <h3>Сфотографируй блюдо</h3>
+
+    <p class="muted">
+      AI определит продукты, примерную порцию и калории.
+    </p>
+
+    <label class="upload">
+      Выбрать фото / открыть камеру
+      <input id="photo" type="file" accept="image/*" capture="environment">
+    </label>
+
+  </div>
+
+  <div id="status"></div>
+
+  <img id="preview" class="preview hidden">
+
+  <div id="result" class="hidden"></div>
+
+</section>
+
+<!-- ПРОФИЛЬ -->
+<section class="card">
+
+  <div class="row">
+    <h2 class="title">👤 Твой профиль</h2>
+  </div>
+
+  <div class="formGrid" style="margin-top:12px">
+
+    <div>
+      <label>Возраст</label>
+      <input id="age" type="number" inputmode="numeric" value="18">
+    </div>
+
+    <div>
+      <label>Пол</label>
+
+      <select id="sex">
+        <option value="male">Мужской</option>
+        <option value="female">Женский</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Начальный вес, кг</label>
+      <input id="weight" type="number" inputmode="decimal" step="0.1" value="70">
+    </div>
+
+    <div>
+      <label>Рост, см</label>
+      <input id="height" type="number" inputmode="numeric" value="175">
+    </div>
+
+  </div>
+
+  <label style="margin-top:8px">Целевой вес, кг</label>
+
+  <input
+    id="targetWeight"
+    type="number"
+    inputmode="decimal"
+    step="0.1"
+    placeholder="Например, 80"
+  >
+
+  <label style="margin-top:8px">Активность</label>
+
+  <select id="activity">
+
+    <option value="1.2">Минимальная</option>
+
+    <option value="1.375">Лёгкая</option>
+
+    <option value="1.55" selected>Средняя</option>
+
+    <option value="1.725">Высокая</option>
+
+  </select>
+
+  <button class="primary" style="margin-top:12px" onclick="saveProfileAndGoal()">
+    Сохранить профиль и цель
+  </button>
+
+  <p id="goalText" class="small"></p>
+
+</section>
+
+<!-- ДНЕВНИК -->
+<section class="card">
+
+  <div class="row">
+
+    <h2 class="title">📖 Сегодня</h2>
+
+    <span class="small" id="mealCount">0</span>
+
+  </div>
+
+  <div id="diary">
+    <div class="empty">Добавь первое блюдо 📸</div>
+  </div>
+
+</section>
+
+<!-- ИСТОРИЯ -->
+<section class="card hidden" id="historyCard">
+
+  <div class="row">
+
+    <h2 class="title">🗓 История</h2>
+
+    <button
+      class="secondary"
+      style="width:auto;margin:0"
+      onclick="showHome()"
+    >
+      Главная
+    </button>
+
+  </div>
+
+  <div id="history"></div>
+
+</section>
+
+<!-- РУЧНОЕ ДОБАВЛЕНИЕ -->
+<section class="card hidden" id="manualCard">
+
+  <div class="row">
+
+    <h2 class="title">✍️ Добавить вручную</h2>
+
+    <button
+      class="secondary"
+      style="width:auto;margin:0"
+      onclick="showHome()"
+    >
+      Закрыть
+    </button>
+
+  </div>
+
+  <div style="margin-top:12px">
+
+    <label>Название блюда</label>
+
+    <input
+      id="mName"
+      placeholder="Например, овсянка"
+    >
+
+  </div>
+
+  <div class="formGrid" style="margin-top:8px">
+
+    <div>
+      <label>Калории, ккал</label>
+      <input id="mCal" type="number" min="0" step="1">
+    </div>
+
+    <div>
+      <label>Порция, г</label>
+      <input id="mGrams" type="number" min="0" step="1" value="100">
+    </div>
+
+    <div>
+      <label>Белки, г</label>
+      <input id="mP" type="number" min="0" step="0.1">
+    </div>
+
+    <div>
+      <label>Жиры, г</label>
+      <input id="mF" type="number" min="0" step="0.1">
+    </div>
+
+    <div>
+      <label>Углеводы, г</label>
+      <input id="mC" type="number" min="0" step="0.1">
+    </div>
+
+  </div>
+
+  <button
+    class="primary"
+    style="margin-top:12px"
+    onclick="addManualMeal()"
+  >
+    Добавить в дневник
+  </button>
+
+  <p id="manualError" class="error hidden"></p>
+
+</section>
+
+<p class="small" style="padding:4px 4px">
+  Важно: калории, масса и БЖУ по фотографии — приблизительная оценка, а не медицинское измерение.
+</p>
+
 </main>
+
 <nav class="nav">
-  <div onclick="showHome()"><b>⌂</b>Главная</div>
-  <div onclick="showAdd()"><b>＋</b>Добавить</div>
-  <div onclick="showHistory()"><b>◷</b>История</div>
+
+  <div onclick="showHome()">
+    <b>⌂</b>
+    Главная
+  </div>
+
+  <div onclick="showAdd()">
+    <b>＋</b>
+    Добавить
+  </div>
+
+  <div onclick="showHistory()">
+    <b>◷</b>
+    История
+  </div>
+
 </nav>
 
 <script>
+
 const $=x=>document.getElementById(x);
-const todayKey=()=>new Date().toISOString().slice(0,10);
-const emptyDay=()=>({cal:0,p:0,f:0,c:0,meals:[]});
-let day=JSON.parse(localStorage.getItem("foodlens-day")||'{"cal":0,"p":0,"f":0,"c":0,"meals":[]}');
-let goal=Number(localStorage.getItem("foodlens-goal")||0);
-let history=JSON.parse(localStorage.getItem("foodlens-history")||"{}");
+
+function todayKey(){
+  const d=new Date();
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,"0");
+  const day=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+
+function emptyDay(){
+  return {
+    cal:0,
+    p:0,
+    f:0,
+    c:0,
+    meals:[]
+  };
+}
+
+/* =========================
+   ДАННЫЕ
+========================= */
+
+let profile=JSON.parse(
+  localStorage.getItem("foodlens-profile")||"null"
+);
+
+let goal=Number(
+  localStorage.getItem("foodlens-goal")||0
+);
+
+let history=JSON.parse(
+  localStorage.getItem("foodlens-history")||"{}"
+);
+
+let weightHistory=JSON.parse(
+  localStorage.getItem("foodlens-weight-history")||"[]"
+);
+
+/*
+  Исправление старой версии:
+  теперь каждый день имеет собственную запись.
+*/
+
+const currentKey=todayKey();
+
+if(!history[currentKey]){
+  history[currentKey]=emptyDay();
+}
+
+let day=history[currentKey];
+
+/* =========================
+   СОХРАНЕНИЕ
+========================= */
 
 function saveDay(){
-  localStorage.setItem("foodlens-day",JSON.stringify(day));
+
   history[todayKey()]=day;
-  localStorage.setItem("foodlens-history",JSON.stringify(history));
+
+  localStorage.setItem(
+    "foodlens-history",
+    JSON.stringify(history)
+  );
 }
-function render(){
- $("heroCal").textContent=Math.round(day.cal)+" ккал"; $("heroGoal").textContent=goal?Math.round(goal):"—";
- $("heroLeft").textContent=goal?Math.max(0,Math.round(goal-day.cal)):"—"; $("heroP").textContent=Math.round(day.p)+" г"; $("heroMeals").textContent=day.meals.length;
- $("p").textContent=Math.round(day.p);$("f").textContent=Math.round(day.f);$("c").textContent=Math.round(day.c);
- const pct=goal?Math.min(100,Math.round(day.cal/goal*100)):0;$("percent").textContent=pct+"%";$("bar").style.width=pct+"%";
- $("mealCount").textContent=day.meals.length+" приёмов";
- $("diary").innerHTML=day.meals.length?day.meals.map((m,i)=>`<div class="item"><div><b>${escapeHtml(m.name)}</b><br><span class="small">${m.time} · ${Math.round(m.protein||0)} г белка · ${Math.round(m.fat||0)} г жиров · ${Math.round(m.carbs||0)} г углеводов</span></div><div style="text-align:right"><b>${Math.round(m.calories)} ккал</b><br><button class="secondary" style="width:auto;margin-top:6px;padding:7px 10px" onclick="removeMeal(${i})">Удалить</button></div></div>`).join(""):'<div class="empty">Добавь первое блюдо 📸</div>';
- saveDay();
+
+function saveWeights(){
+
+  localStorage.setItem(
+    "foodlens-weight-history",
+    JSON.stringify(weightHistory)
+  );
 }
+
+function saveProfile(){
+
+  localStorage.setItem(
+    "foodlens-profile",
+    JSON.stringify(profile)
+  );
+}
+
+/* =========================
+   HTML SECURITY
+========================= */
+
 function escapeHtml(s){
- return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
+
+  return String(s??"").replace(
+    /[&<>"']/g,
+    c=>({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      "\"":"&quot;",
+      "'":"&#039;"
+    }[c])
+  );
+
 }
+
+/* =========================
+   ОСНОВНОЙ RENDER
+========================= */
+
+function render(){
+
+  $("heroCal").textContent=
+    Math.round(day.cal)+" ккал";
+
+  $("heroGoal").textContent=
+    goal?Math.round(goal):"—";
+
+  $("heroLeft").textContent=
+    goal
+    ?Math.max(0,Math.round(goal-day.cal))
+    :"—";
+
+  $("heroP").textContent=
+    Math.round(day.p)+" г";
+
+  $("heroMeals").textContent=
+    day.meals.length;
+
+  $("p").textContent=
+    Math.round(day.p);
+
+  $("f").textContent=
+    Math.round(day.f);
+
+  $("c").textContent=
+    Math.round(day.c);
+
+  const pct=goal
+    ?Math.min(100,Math.round(day.cal/goal*100))
+    :0;
+
+  $("percent").textContent=pct+"%";
+
+  $("bar").style.width=pct+"%";
+
+  $("mealCount").textContent=
+    day.meals.length+" приёмов";
+
+  $("diary").innerHTML=
+    day.meals.length
+
+    ?day.meals.map((m,i)=>`
+
+      <div class="item">
+
+        <div>
+
+          <b>${escapeHtml(m.name)}</b>
+
+          <br>
+
+          <span class="small">
+            ${m.time}
+            · ${Math.round(m.protein||0)} г белка
+            · ${Math.round(m.fat||0)} г жиров
+            · ${Math.round(m.carbs||0)} г углеводов
+          </span>
+
+        </div>
+
+        <div style="text-align:right">
+
+          <b>${Math.round(m.calories)} ккал</b>
+
+          <br>
+
+          <button
+            class="secondary"
+            style="width:auto;margin-top:6px;padding:7px 10px"
+            onclick="removeMeal(${i})"
+          >
+            Удалить
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join("")
+
+    :
+
+    '<div class="empty">Добавь первое блюдо 📸</div>';
+
+  saveDay();
+
+  renderWeightProgress();
+
+}
+
+/* =========================
+   ВЕС
+========================= */
+
+function renderWeightProgress(){
+
+  if(!profile){
+
+    $("startWeightDisplay").textContent="—";
+    $("currentWeightDisplay").textContent="—";
+    $("targetWeightDisplay").textContent="—";
+    $("weightProgressPercent").textContent="0%";
+    $("weightLostText").textContent="Создай цель";
+    $("weightRemainingText").textContent="";
+    $("weightBar").style.width="0%";
+
+    drawWeightChart();
+
+    return;
+  }
+
+  const start=Number(profile.startWeight);
+  const target=Number(profile.targetWeight);
+
+  const latest=
+    weightHistory.length
+    ?Number(weightHistory[weightHistory.length-1].weight)
+    :start;
+
+  $("startWeightDisplay").textContent=
+    start.toFixed(1)+" кг";
+
+  $("currentWeightDisplay").textContent=
+    latest.toFixed(1)+" кг";
+
+  $("targetWeightDisplay").textContent=
+    target.toFixed(1)+" кг";
+
+  let progress=0;
+
+  if(start!==target){
+
+    progress=
+      ((start-latest)/(start-target))*100;
+
+    progress=Math.max(0,Math.min(100,progress));
+
+  }
+
+  $("weightProgressPercent").textContent=
+    Math.round(progress)+"%";
+
+  $("weightBar").style.width=
+    progress+"%";
+
+  const lost=start-latest;
+  const remaining=Math.abs(latest-target);
+
+  if(Math.abs(lost)<0.05){
+
+    $("weightLostText").textContent=
+      "Изменение: 0 кг";
+
+  }else if(lost>0){
+
+    $("weightLostText").textContent=
+      `Сброшено: ${lost.toFixed(1)} кг`;
+
+  }else{
+
+    $("weightLostText").textContent=
+      `Изменение: +${Math.abs(lost).toFixed(1)} кг`;
+
+  }
+
+  if(latest>target){
+
+    $("weightRemainingText").textContent=
+      `До цели: ${remaining.toFixed(1)} кг`;
+
+  }else if(latest===target){
+
+    $("weightRemainingText").textContent=
+      "🎯 Цель достигнута!";
+
+  }else{
+
+    $("weightRemainingText").textContent=
+      `Ниже цели на ${remaining.toFixed(1)} кг`;
+
+  }
+
+  drawWeightChart();
+
+}
+
+/* =========================
+   ГРАФИК
+========================= */
+
+function drawWeightChart(){
+
+  const canvas=$("weightChart");
+
+  if(!canvas)return;
+
+  const rect=canvas.getBoundingClientRect();
+
+  const width=Math.max(
+    300,
+    Math.floor(rect.width||300)
+  );
+
+  const height=220;
+
+  const dpr=window.devicePixelRatio||1;
+
+  canvas.width=width*dpr;
+  canvas.height=height*dpr;
+
+  const ctx=canvas.getContext("2d");
+
+  ctx.scale(dpr,dpr);
+
+  ctx.clearRect(0,0,width,height);
+
+  if(weightHistory.length===0){
+
+    ctx.fillStyle="#7b8582";
+    ctx.font="14px system-ui";
+    ctx.textAlign="center";
+
+    ctx.fillText(
+      "Добавь первое взвешивание",
+      width/2,
+      height/2
+    );
+
+    return;
+  }
+
+  const values=
+    weightHistory.map(x=>Number(x.weight));
+
+  if(profile && profile.targetWeight){
+
+    values.push(Number(profile.targetWeight));
+
+  }
+
+  const min=Math.min(...values);
+  const max=Math.max(...values);
+
+  const padding=30;
+
+  const range=
+    Math.max(1,max-min);
+
+  const xStep=
+    weightHistory.length>1
+    ?(width-padding*2)/(weightHistory.length-1)
+    :0;
+
+  function y(value){
+
+    return height-padding-
+      ((value-min)/range)*(height-padding*2);
+
+  }
+
+  /* сетка */
+
+  ctx.strokeStyle="#e1e5e2";
+  ctx.lineWidth=1;
+
+  for(let i=0;i<4;i++){
+
+    const gy=
+      padding+
+      i*((height-padding*2)/3);
+
+    ctx.beginPath();
+    ctx.moveTo(padding,gy);
+    ctx.lineTo(width-padding,gy);
+    ctx.stroke();
+
+  }
+
+  /* линия цели */
+
+  if(profile && profile.targetWeight){
+
+    const ty=y(Number(profile.targetWeight));
+
+    ctx.setLineDash([5,5]);
+
+    ctx.strokeStyle="#aeb8b4";
+
+    ctx.beginPath();
+    ctx.moveTo(padding,ty);
+    ctx.lineTo(width-padding,ty);
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+
+    ctx.fillStyle="#7b8582";
+    ctx.font="11px system-ui";
+
+    ctx.fillText(
+      "цель",
+      padding,
+      Math.max(12,ty-5)
+    );
+
+  }
+
+  /* линия веса */
+
+  ctx.strokeStyle="#111719";
+  ctx.lineWidth=3;
+  ctx.lineJoin="round";
+  ctx.lineCap="round";
+
+  ctx.beginPath();
+
+  weightHistory.forEach((point,i)=>{
+
+    const x=
+      weightHistory.length===1
+      ?width/2
+      :padding+xStep*i;
+
+    const yy=y(Number(point.weight));
+
+    if(i===0)ctx.moveTo(x,yy);
+    else ctx.lineTo(x,yy);
+
+  });
+
+  ctx.stroke();
+
+  /* точки */
+
+  weightHistory.forEach((point,i)=>{
+
+    const x=
+      weightHistory.length===1
+      ?width/2
+      :padding+xStep*i;
+
+    const yy=y(Number(point.weight));
+
+    ctx.fillStyle="#b9e769";
+
+    ctx.beginPath();
+    ctx.arc(x,yy,5,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.strokeStyle="#111719";
+    ctx.lineWidth=2;
+    ctx.stroke();
+
+  });
+
+  /* последнее значение */
+
+  const last=
+    weightHistory[weightHistory.length-1];
+
+  if(last){
+
+    const x=
+      weightHistory.length===1
+      ?width/2
+      :padding+xStep*(weightHistory.length-1);
+
+    const yy=y(Number(last.weight));
+
+    ctx.fillStyle="#111719";
+    ctx.font="bold 13px system-ui";
+    ctx.textAlign="right";
+
+    ctx.fillText(
+      Number(last.weight).toFixed(1)+" кг",
+      Math.min(width-padding,x+45),
+      yy-10
+    );
+
+  }
+
+}
+
+/* =========================
+   ДОБАВЛЕНИЕ ВЕСА
+========================= */
+
+function showWeightForm(){
+
+  $("weightFormCard").classList.remove("hidden");
+
+  $("newWeight").value=
+    profile
+    ?(
+      weightHistory.length
+      ?weightHistory[weightHistory.length-1].weight
+      :profile.startWeight
+    )
+    :"";
+
+  $("weightFormCard").scrollIntoView({
+    behavior:"smooth"
+  });
+
+}
+
+function hideWeightForm(){
+
+  $("weightFormCard").classList.add("hidden");
+
+}
+
+function saveWeight(){
+
+  const value=
+    Number($("newWeight").value);
+
+  if(!Number.isFinite(value)||value<=0||value>500){
+
+    $("weightError").textContent=
+      "Введи корректный вес.";
+
+    $("weightError").classList.remove("hidden");
+
+    return;
+  }
+
+  $("weightError").classList.add("hidden");
+
+  const date=todayKey();
+
+  const existing=
+    weightHistory.findIndex(x=>x.date===date);
+
+  const record={
+    date,
+    weight:Number(value.toFixed(1))
+  };
+
+  if(existing>=0){
+
+    weightHistory[existing]=record;
+
+  }else{
+
+    weightHistory.push(record);
+
+  }
+
+  weightHistory.sort(
+    (a,b)=>a.date.localeCompare(b.date)
+  );
+
+  saveWeights();
+
+  /*
+    Текущий вес становится последним измерением.
+  */
+
+  if(profile){
+
+    profile.currentWeight=
+      Number(value.toFixed(1));
+
+    saveProfile();
+
+  }
+
+  hideWeightForm();
+
+  renderWeightProgress();
+
+}
+
+/* =========================
+   УДАЛЕНИЕ ЕДЫ
+========================= */
+
 function removeMeal(i){
- const m=day.meals[i]; if(!m)return;
- day.cal-=Number(m.calories)||0; day.p-=Number(m.protein)||0; day.f-=Number(m.fat)||0; day.c-=Number(m.carbs)||0;
- day.meals.splice(i,1); render();
+
+  const m=day.meals[i];
+
+  if(!m)return;
+
+  day.cal-=Number(m.calories)||0;
+  day.p-=Number(m.protein)||0;
+  day.f-=Number(m.fat)||0;
+  day.c-=Number(m.carbs)||0;
+
+  day.meals.splice(i,1);
+
+  render();
+
 }
+
+/* =========================
+   РУЧНАЯ ЕДА
+========================= */
+
 function addManualMeal(){
- const name=$("mName").value.trim(), cal=+$("mCal").value, grams=+$("mGrams").value||0, p=+$("mP").value||0, f=+$("mF").value||0, c=+$("mC").value||0;
- if(!name || !Number.isFinite(cal) || cal<0){$("manualError").textContent="Укажи название и корректные калории."; $("manualError").classList.remove("hidden"); return;}
- $("manualError").classList.add("hidden");
- const meal={name,grams,calories:cal,protein:p,fat:f,carbs:c,time:new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})};
- day.cal+=cal; day.p+=p; day.f+=f; day.c+=c; day.meals.push(meal); render();
- ["mName","mCal","mP","mF","mC"].forEach(id=>$(id).value=""); $("mGrams").value=100; showHome();
+
+  const name=$("mName").value.trim();
+
+  const cal=+$("mCal").value;
+
+  const grams=+$("mGrams").value||0;
+
+  const p=+$("mP").value||0;
+
+  const f=+$("mF").value||0;
+
+  const c=+$("mC").value||0;
+
+  if(
+    !name ||
+    !Number.isFinite(cal) ||
+    cal<0
+  ){
+
+    $("manualError").textContent=
+      "Укажи название и корректные калории.";
+
+    $("manualError").classList.remove("hidden");
+
+    return;
+
+  }
+
+  $("manualError").classList.add("hidden");
+
+  const meal={
+    name,
+    grams,
+    calories:cal,
+    protein:p,
+    fat:f,
+    carbs:c,
+    time:new Date().toLocaleTimeString(
+      [],
+      {
+        hour:"2-digit",
+        minute:"2-digit"
+      }
+    )
+  };
+
+  day.cal+=cal;
+  day.p+=p;
+  day.f+=f;
+  day.c+=c;
+  day.meals.push(meal);
+
+  render();
+
+  ["mName","mCal","mP","mF","mC"]
+    .forEach(id=>$(id).value="");
+
+  $("mGrams").value=100;
+
+  showHome();
+
 }
+
+/* =========================
+   ПРОФИЛЬ + ЦЕЛЬ
+========================= */
+
+function saveProfileAndGoal(){
+
+  const age=+$("age").value;
+
+  const startWeight=
+    +$("weight").value;
+
+  const height=+$("height").value;
+
+  const targetWeight=
+    +$("targetWeight").value;
+
+  const sex=$("sex").value;
+
+  const activity=
+    +$("activity").value;
+
+  if(
+    age<=0 ||
+    startWeight<=0 ||
+    height<=0 ||
+    targetWeight<=0
+  ){
+
+    $("goalText").textContent=
+      "Заполни все данные корректно.";
+
+    return;
+
+  }
+
+  /*
+    Если профиль создаётся впервые,
+    записываем стартовый вес.
+  */
+
+  const oldProfile=profile;
+
+  profile={
+    age,
+    startWeight,
+    currentWeight:
+      oldProfile?.currentWeight||
+      startWeight,
+    targetWeight,
+    height,
+    sex,
+    activity,
+    startDate:
+      oldProfile?.startDate||
+      todayKey()
+  };
+
+  saveProfile();
+
+  /*
+    Если истории ещё нет,
+    автоматически создаём первую запись.
+  */
+
+  if(weightHistory.length===0){
+
+    weightHistory.push({
+      date:profile.startDate,
+      weight:Number(startWeight.toFixed(1))
+    });
+
+    saveWeights();
+
+  }
+
+  /*
+    Расчёт калорий оставляем
+    совместимым с твоей старой логикой.
+  */
+
+  if(age<15){
+
+    goal=0;
+
+    localStorage.setItem(
+      "foodlens-goal",
+      "0"
+    );
+
+    $("goalText").textContent=
+      "Для детей и подростков приложение не рассчитывает дефицит. Обратись к врачу/диетологу.";
+
+    render();
+
+    return;
+
+  }
+
+  const bmr=
+    10*startWeight+
+    6.25*height-
+    5*age+
+    (sex==="male"?5:-161);
+
+  const maint=bmr*activity;
+
+  goal=Math.round(maint*.9);
+
+  localStorage.setItem(
+    "foodlens-goal",
+    goal
+  );
+
+  $("goalText").textContent=
+    `Ориентировочная поддержка: ${Math.round(maint)} ккал/день. Ориентир питания: ${goal} ккал/день.`;
+
+  render();
+
+}
+
+/* =========================
+   НАВИГАЦИЯ
+========================= */
+
 function showHome(){
- $("historyCard").classList.add("hidden"); $("manualCard").classList.add("hidden");
- document.querySelector(".hero").classList.remove("hidden");
- [...document.querySelectorAll(".card")].filter(x=>x!==$("historyCard")&&x!==$("manualCard")).forEach(x=>x.classList.remove("hidden"));
- window.scrollTo({top:0,behavior:"smooth"});
+
+  $("historyCard").classList.add("hidden");
+
+  $("manualCard").classList.add("hidden");
+
+  $("weightFormCard").classList.add("hidden");
+
+  document
+    .querySelector(".hero")
+    .classList.remove("hidden");
+
+  [
+    ...document.querySelectorAll(".card")
+  ]
+  .filter(
+    x=>
+      x!==$("historyCard")&&
+      x!==$("manualCard")
+  )
+  .forEach(
+    x=>x.classList.remove("hidden")
+  );
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+
 }
+
 function showAdd(){
- showHome(); $("manualCard").classList.remove("hidden"); $("manualCard").scrollIntoView({behavior:"smooth"});
+
+  showHome();
+
+  $("manualCard").classList.remove("hidden");
+
+  $("manualCard").scrollIntoView({
+    behavior:"smooth"
+  });
+
 }
+
 function showHistory(){
- [...document.querySelectorAll(".card")].forEach(x=>x.classList.add("hidden"));
- $("historyCard").classList.remove("hidden");
- $("history").innerHTML=Object.keys(history).sort().reverse().map(k=>{
-   const d=history[k]||emptyDay();
-   return `<div class="item"><div><b>${k}</b><br><span class="small">${d.meals.length} приёмов · ${Math.round(d.p)} г белка</span></div><b>${Math.round(d.cal)} ккал</b></div>`;
- }).join("") || '<div class="empty">История пока пуста.</div>';
- window.scrollTo({top:0,behavior:"smooth"});
+
+  [
+    ...document.querySelectorAll(".card")
+  ]
+  .forEach(
+    x=>x.classList.add("hidden")
+  );
+
+  $("historyCard").classList.remove("hidden");
+
+  const dates=
+    Object.keys(history)
+    .sort()
+    .reverse();
+
+  let html="";
+
+  dates.forEach(k=>{
+
+    const d=history[k]||emptyDay();
+
+    html+=`
+
+      <div class="item">
+
+        <div>
+
+          <b>${k}</b>
+
+          <br>
+
+          <span class="small">
+            ${d.meals.length} приёмов
+            · ${Math.round(d.p)} г белка
+          </span>
+
+        </div>
+
+        <b>
+          ${Math.round(d.cal)} ккал
+        </b>
+
+      </div>
+
+    `;
+
+  });
+
+  $("history").innerHTML=
+    html||
+    '<div class="empty">История пока пуста.</div>';
+
+  /*
+    Показываем историю веса
+  */
+
+  if(weightHistory.length){
+
+    $("history").innerHTML+=`
+
+      <h3 style="margin:20px 0 5px">
+        ⚖️ История веса
+      </h3>
+
+      <div class="weightList">
+
+        ${weightHistory
+          .slice()
+          .reverse()
+          .map(x=>`
+
+            <div class="weightEntry">
+
+              <span>${x.date}</span>
+
+              <b>${Number(x.weight).toFixed(1)} кг</b>
+
+            </div>
+
+          `)
+          .join("")}
+
+      </div>
+
+    `;
+
+  }
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+
 }
-function calcGoal(){
- const age=+$("age").value,w=+$("weight").value,h=+$("height").value,a=+$("activity").value;
- localStorage.setItem("foodlens-profile",JSON.stringify({age,weight:w,height:h,sex:$("sex").value,activity:a}));
- if(age<15){goal=0;$("goalText").textContent="Для детей и подростков приложение не рассчитывает дефицит. Обратись к врачу/диетологу.";render();return}
- const bmr=10*w+6.25*h-5*age+($("sex").value==="male"?5:-161),maint=bmr*a;
- goal=Math.round(maint*.9);localStorage.setItem("foodlens-goal",goal);
- $("goalText").textContent=`Ориентировочная поддержка: ${Math.round(maint)} ккал/день. Приложение использует мягкий ориентир без экстремального ограничения.`;
- render();
-}
-$("photo").addEventListener("change",async e=>{
- const file=e.target.files[0];if(!file)return;
- $("preview").src=URL.createObjectURL(file);$("preview").classList.remove("hidden");$("result").classList.add("hidden");
- $("status").innerHTML='<div class="loading"><span class="spinner"></span>AI анализирует фото…</div>';
- const fd=new FormData();fd.append("photo",file);
- try{
-  const r=await fetch("/api/analyze",{method:"POST",body:fd}),d=await r.json();if(!r.ok)throw new Error(d.error||"Ошибка");
-  $("status").innerHTML="";
-  $("result").innerHTML=`<h3>Что нашёл AI</h3>${d.items.map(x=>`<div class="item"><div><b>${x.name}</b><br><span class="tag">${Math.round(x.grams)} г · ${Math.round(x.confidence*100)}% уверенность</span></div><b>${Math.round(x.calories)} ккал</b></div>`).join("")}<div style="padding:14px 0"><b>Итого ${Math.round(d.total.calories)} ккал</b><br><span class="small">${Math.round(d.total.protein_g)} г белка · ${Math.round(d.total.fat_g)} г жиров · ${Math.round(d.total.carbs_g)} г углеводов</span></div><button class="primary" onclick='addMeal(${JSON.stringify(d)})'>Добавить в дневник</button><button class="secondary" onclick='document.getElementById("result").classList.add("hidden")'>Закрыть</button><p class="small">${d.note||""}</p>`;
-  $("result").classList.remove("hidden");
- }catch(err){$("status").innerHTML=`<div class="error">Не получилось: ${err.message}</div>`}
-});
+
+/* =========================
+   AI FOOD ANALYSIS
+   НЕ МЕНЯЕМ ТВОЮ ЛОГИКУ
+========================= */
+
+$("photo").addEventListener(
+  "change",
+  async e=>{
+
+    const file=e.target.files[0];
+
+    if(!file)return;
+
+    $("preview").src=
+      URL.createObjectURL(file);
+
+    $("preview")
+      .classList
+      .remove("hidden");
+
+    $("result")
+      .classList
+      .add("hidden");
+
+    $("status").innerHTML=
+      '<div class="loading"><span class="spinner"></span>AI анализирует фото…</div>';
+
+    const fd=new FormData();
+
+    fd.append("photo",file);
+
+    try{
+
+      const r=await fetch(
+        "/api/analyze",
+        {
+          method:"POST",
+          body:fd
+        }
+      );
+
+      const d=await r.json();
+
+      if(!r.ok)
+        throw new Error(
+          d.error||"Ошибка"
+        );
+
+      $("status").innerHTML="";
+
+      $("result").innerHTML=`
+
+        <h3>Что нашёл AI</h3>
+
+        ${d.items.map(x=>`
+
+          <div class="item">
+
+            <div>
+
+              <b>${escapeHtml(x.name)}</b>
+
+              <br>
+
+              <span class="tag">
+                ${Math.round(x.grams)} г
+                · ${Math.round(x.confidence*100)}% уверенность
+              </span>
+
+            </div>
+
+            <b>
+              ${Math.round(x.calories)} ккал
+            </b>
+
+          </div>
+
+        `).join("")}
+
+        <div style="padding:14px 0">
+
+          <b>
+            Итого ${Math.round(d.total.calories)} ккал
+          </b>
+
+          <br>
+
+          <span class="small">
+            ${Math.round(d.total.protein_g)} г белка
+            · ${Math.round(d.total.fat_g)} г жиров
+            · ${Math.round(d.total.carbs_g)} г углеводов
+          </span>
+
+        </div>
+
+        <button
+          class="primary"
+          onclick='addMeal(${JSON.stringify(d)})'
+        >
+          Добавить в дневник
+        </button>
+
+        <button
+          class="secondary"
+          onclick='document.getElementById("result").classList.add("hidden")'
+        >
+          Закрыть
+        </button>
+
+        <p class="small">
+          ${escapeHtml(d.note||"")}
+        </p>
+
+      `;
+
+      $("result")
+        .classList
+        .remove("hidden");
+
+    }catch(err){
+
+      $("status").innerHTML=
+        `<div class="error">
+          Не получилось: ${escapeHtml(err.message)}
+        </div>`;
+
+    }
+
+  }
+);
+
+/* =========================
+   ДОБАВИТЬ AI БЛЮДО
+========================= */
+
 function addMeal(d){
- day.cal+=d.total.calories;day.p+=d.total.protein_g;day.f+=d.total.fat_g;day.c+=d.total.carbs_g;
- day.meals.push({name:d.items.map(x=>x.name).join(", "),calories:d.total.calories,protein:d.total.protein_g,fat:d.total.fat_g,carbs:d.total.carbs_g,time:new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})});
- render();$("result").classList.add("hidden"); $("status").innerHTML="";
+
+  day.cal+=d.total.calories;
+
+  day.p+=d.total.protein_g;
+
+  day.f+=d.total.fat_g;
+
+  day.c+=d.total.carbs_g;
+
+  day.meals.push({
+
+    name:d.items
+      .map(x=>x.name)
+      .join(", "),
+
+    calories:d.total.calories,
+
+    protein:d.total.protein_g,
+
+    fat:d.total.fat_g,
+
+    carbs:d.total.carbs_g,
+
+    time:new Date().toLocaleTimeString(
+      [],
+      {
+        hour:"2-digit",
+        minute:"2-digit"
+      }
+    )
+
+  });
+
+  render();
+
+  $("result")
+    .classList
+    .add("hidden");
+
+  $("status").innerHTML="";
+
 }
-const savedProfile=JSON.parse(localStorage.getItem("foodlens-profile")||"null");
-if(savedProfile){
- $("age").value=savedProfile.age??18; $("weight").value=savedProfile.weight??70; $("height").value=savedProfile.height??175;
- $("sex").value=savedProfile.sex??"male"; $("activity").value=savedProfile.activity??"1.55";
+
+/* =========================
+   ЗАГРУЗКА ПРОФИЛЯ
+========================= */
+
+function loadProfile(){
+
+  if(!profile)return;
+
+  $("age").value=
+    profile.age??18;
+
+  $("weight").value=
+    profile.startWeight??70;
+
+  $("height").value=
+    profile.height??175;
+
+  $("targetWeight").value=
+    profile.targetWeight??"";
+
+  $("sex").value=
+    profile.sex??"male";
+
+  $("activity").value=
+    profile.activity??"1.55";
+
 }
+
+/* =========================
+   СТАРТ
+========================= */
+
+loadProfile();
+
 render();
-</script></body></html>
+
+window.addEventListener(
+  "resize",
+  drawWeightChart
+);
+
+</script>
+
+</body>
+</html>
