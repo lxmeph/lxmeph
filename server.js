@@ -18,7 +18,7 @@ app.post("/api/analyze", upload.single("photo"), async (req, res) => {
   try {
     if (!process.env.OPENROUTER_API_KEY) {
       return res.status(500).json({
-        error: "Не найден OPENROUTER_API_KEY в Render"
+        error: "OPENROUTER_API_KEY не найден"
       });
     }
 
@@ -28,80 +28,39 @@ app.post("/api/analyze", upload.single("photo"), async (req, res) => {
       });
     }
 
-    const base64Image = req.file.buffer.toString("base64");
-    const mimeType = req.file.mimetype || "image/jpeg";
+    const image = req.file.buffer.toString("base64");
+    const mime = req.file.mimetype || "image/jpeg";
 
-    const prompt = `
-Ты AI-ассистент приложения FoodLens.
-
-Проанализируй еду на фотографии.
-
-Определи приблизительно:
-- название каждого продукта или блюда;
-- примерный вес в граммах;
-- калории;
-- белки;
-- жиры;
-- углеводы.
-
-Не создавай ложную точность. Если порцию невозможно определить точно, оцени её приблизительно.
-
-Верни ТОЛЬКО JSON, без markdown и без ```.
-
-Формат:
-
-{
-  "items": [
-    {
-      "name": "название",
-      "grams": 0,
-      "calories": 0,
-      "protein_g": 0,
-      "fat_g": 0,
-      "carbs_g": 0,
-      "confidence": 0.0
-    }
-  ],
-  "total": {
-    "calories": 0,
-    "protein_g": 0,
-    "fat_g": 0,
-    "carbs_g": 0
-  },
-  "note": "краткая оговорка об оценке"
-}
-
-confidence — число от 0 до 1.
-`;
+    const requestBody = {
+      model: "openrouter/free",
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Проанализируй еду на фотографии. Верни только JSON с полями items и total. Для каждого продукта укажи name, grams, calories, protein_g, fat_g, carbs_g, confidence. В total укажи calories, protein_g, fat_g, carbs_g. Оцени приблизительно и не создавай ложную точность."
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: "data:" + mime + ";base64," + image
+              }
+            }
+          ]
+        }
+      ]
+    };
 
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
       {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          "Authorization": "Bearer " + process.env.OPENROUTER_API_KEY,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          model: "openrouter/free",
-          messages: [
-            {
-              role: "user",
-              content: [
-                {
-                  type: "text",
-                  text: prompt
-                },
-                {
-                  type: "image_url",
-                  image_url: {
-                    url: `data:${mimeType};base64,${base64Image}`
-                  }
-                }
-              ]
-            }
-          ]
-        })
+        body: JSON.stringify(requestBody)
       }
     );
 
@@ -109,11 +68,11 @@ confidence — число от 0 до 1.
 
     if (!response.ok) {
       return res.status(response.status).json({
-        error: result?.error?.message || "Ошибка OpenRouter"
+        error: result.error?.message || "Ошибка OpenRouter"
       });
     }
 
-    let text = result?.choices?.[0]?.message?.content || "";
+    let text = result.choices?.[0]?.message?.content || "";
 
     text = text
       .replace(/^```json\s*/i, "")
@@ -125,23 +84,21 @@ confidence — число от 0 до 1.
 
     res.json(data);
 
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error(error);
 
     res.status(500).json({
-      error: e.message || "AI не смог обработать фото"
+      error: error.message || "Ошибка AI"
     });
   }
 });
 
 app.get("/api/health", (req, res) => {
-  res.json({
-    ok: true
-  });
+  res.json({ ok: true });
 });
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`FoodLens running on port ${PORT}`);
+  console.log("FoodLens running on port " + PORT);
 });
