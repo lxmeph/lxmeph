@@ -1,7 +1,6 @@
 import "dotenv/config";
 import express from "express";
 import multer from "multer";
-import { GoogleGenAI } from "@google/genai";
 
 const app = express();
 
@@ -12,18 +11,14 @@ const upload = multer({
   }
 });
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY
-});
-
 app.use(express.static("."));
 app.use(express.json());
 
 app.post("/api/analyze", upload.single("photo"), async (req, res) => {
   try {
-    if (!process.env.GEMINI_API_KEY) {
+    if (!process.env.OPENROUTER_API_KEY) {
       return res.status(500).json({
-        error: "Не найден GEMINI_API_KEY в Render"
+        error: "Не найден OPENROUTER_API_KEY в Render"
       });
     }
 
@@ -39,17 +34,21 @@ app.post("/api/analyze", upload.single("photo"), async (req, res) => {
     const prompt = `
 Ты AI-ассистент приложения FoodLens.
 
-Посмотри на фотографию еды и оцени:
-- продукты;
-- примерный вес каждого продукта;
+Проанализируй еду на фотографии.
+
+Определи приблизительно:
+- название каждого продукта или блюда;
+- примерный вес в граммах;
 - калории;
 - белки;
 - жиры;
 - углеводы.
 
-Не создавай ложную точность.
+Не создавай ложную точность. Если порцию невозможно определить точно, оцени её приблизительно.
 
-Верни ТОЛЬКО JSON:
+Верни ТОЛЬКО JSON, без markdown и без ```.
+
+Формат:
 
 {
   "items": [
@@ -72,25 +71,49 @@ app.post("/api/analyze", upload.single("photo"), async (req, res) => {
   "note": "краткая оговорка об оценке"
 }
 
-confidence должен быть от 0 до 1.
+confidence — число от 0 до 1.
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash-lite",
-      contents: [
-        {
-          inlineData: {
-            mimeType: mimeType,
-            data: base64Image
-          }
+    const response = await fetch(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json"
         },
-        {
-          text: prompt
-        }
-      ]
-    });
+        body: JSON.stringify({
+          model: "openrouter/free",
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: prompt
+                },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: `data:${mimeType};base64,${base64Image}`
+                  }
+                }
+              ]
+            }
+          ]
+        })
+      }
+    );
 
-    let text = response.text || "";
+    const result = await response.json();
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: result?.error?.message || "Ошибка OpenRouter"
+      });
+    }
+
+    let text = result?.choices?.[0]?.message?.content || "";
 
     text = text
       .replace(/^```json\s*/i, "")
@@ -106,7 +129,7 @@ confidence должен быть от 0 до 1.
     console.error(e);
 
     res.status(500).json({
-      error: e.message || "Gemini не смог обработать фото"
+      error: e.message || "AI не смог обработать фото"
     });
   }
 });
