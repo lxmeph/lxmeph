@@ -7,14 +7,35 @@ import { fileURLToPath } from "url";
 
 const { Pool } = pg;
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE
-});
-
 const app = express();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+/* =========================
+   POSTGRESQL
+========================= */
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE
+});
+
+/* Проверка подключения к PostgreSQL */
+
+pool.query("SELECT NOW()")
+  .then(() => {
+    console.log("PostgreSQL connected");
+  })
+  .catch((error) => {
+    console.error(
+      "PostgreSQL connection error:",
+      error
+    );
+  });
+
+/* =========================
+   ЗАГРУЗКА ФОТО
+========================= */
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -25,41 +46,90 @@ const upload = multer({
 
 app.use(express.json());
 
-pool.query("SELECT NOW()")
-  .then(() => {
-    console.log("PostgreSQL connected");
-  })
-  .catch((error) => {
-    console.error("PostgreSQL connection error:", error);
-  });
+/* =========================
+   САЙТ
+========================= */
 
 // Раздаём файлы сайта
 app.use(express.static(__dirname));
 
 // Главная страница
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(
+    path.join(__dirname, "index.html")
+  );
 });
 
-// AI-анализ фотографии
-app.post("/api/analyze", upload.single("photo"), async (req, res) => {
+/* =========================
+   ПРОВЕРКА DATABASE
+========================= */
+
+app.get("/api/db-test", async (req, res) => {
+
   try {
-    if (!process.env.OPENROUTER_API_KEY) {
-      return res.status(500).json({
-        error: "OPENROUTER_API_KEY не найден в Render"
-      });
-    }
 
-    if (!req.file) {
-      return res.status(400).json({
-        error: "Фото не загружено"
-      });
-    }
+    const result = await pool.query(
+      "SELECT NOW() AS time"
+    );
 
-    const image = req.file.buffer.toString("base64");
-    const mime = req.file.mimetype || "image/jpeg";
+    res.json({
+      ok: true,
+      database: "connected",
+      time: result.rows[0].time
+    });
 
-    const prompt = `
+  } catch (error) {
+
+    console.error(
+      "Database test error:",
+      error
+    );
+
+    res.status(500).json({
+      ok: false,
+      error: error.message
+    });
+
+  }
+
+});
+
+/* =========================
+   AI-АНАЛИЗ ФОТО
+========================= */
+
+app.post(
+  "/api/analyze",
+  upload.single("photo"),
+  async (req, res) => {
+
+    try {
+
+      if (!process.env.OPENROUTER_API_KEY) {
+
+        return res.status(500).json({
+          error:
+            "OPENROUTER_API_KEY не найден в Render"
+        });
+
+      }
+
+      if (!req.file) {
+
+        return res.status(400).json({
+          error: "Фото не загружено"
+        });
+
+      }
+
+      const image =
+        req.file.buffer.toString("base64");
+
+      const mime =
+        req.file.mimetype ||
+        "image/jpeg";
+
+      const prompt = `
 Ты AI-ассистент приложения FoodLens.
 
 Проанализируй еду на фотографии.
@@ -104,87 +174,177 @@ confidence должен быть числом от 0 до 1.
 Не добавляй никаких слов до или после JSON.
 `;
 
-    const requestBody = {
-      model: "openrouter/free",
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: prompt
-            },
-            {
-              type: "image_url",
-              image_url: {
-                url: "data:" + mime + ";base64," + image
+      const requestBody = {
+
+        model: "openrouter/free",
+
+        messages: [
+
+          {
+            role: "user",
+
+            content: [
+
+              {
+                type: "text",
+                text: prompt
+              },
+
+              {
+                type: "image_url",
+
+                image_url: {
+                  url:
+                    "data:" +
+                    mime +
+                    ";base64," +
+                    image
+                }
               }
-            }
-          ]
+
+            ]
+          }
+
+        ]
+      };
+
+      const response = await fetch(
+        "https://openrouter.ai/api/v1/chat/completions",
+        {
+          method: "POST",
+
+          headers: {
+            "Authorization":
+              "Bearer " +
+              process.env.OPENROUTER_API_KEY,
+
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify(requestBody)
         }
-      ]
-    };
+      );
 
-    const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer " + process.env.OPENROUTER_API_KEY,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(requestBody)
+      const result =
+        await response.json();
+
+      if (!response.ok) {
+
+        return res
+          .status(response.status)
+          .json({
+            error:
+              result?.error?.message ||
+              "Ошибка OpenRouter"
+          });
+
       }
-    );
 
-    const result = await response.json();
+      let text =
+        result
+          ?.choices?.[0]
+          ?.message
+          ?.content ||
+        "";
 
-    if (!response.ok) {
-      return res.status(response.status).json({
-        error: result?.error?.message || "Ошибка OpenRouter"
+      text = text.trim();
+
+      /* Убираем markdown, если AI его всё-таки вернул */
+
+      if (text.startsWith("```")) {
+
+        text =
+          text.replace(
+            /^```(?:json)?\s*/i,
+            ""
+          );
+
+        text =
+          text.replace(
+            /\s*```\s*$/i,
+            ""
+          );
+
+      }
+
+      /* Находим JSON */
+
+      const firstBrace =
+        text.indexOf("{");
+
+      const lastBrace =
+        text.lastIndexOf("}");
+
+      if (
+        firstBrace === -1 ||
+        lastBrace === -1
+      ) {
+
+        throw new Error(
+          "AI не вернул JSON"
+        );
+
+      }
+
+      text =
+        text.slice(
+          firstBrace,
+          lastBrace + 1
+        );
+
+      const data =
+        JSON.parse(text);
+
+      res.json(data);
+
+    } catch (error) {
+
+      console.error(
+        "FoodLens error:",
+        error
+      );
+
+      res.status(500).json({
+        error:
+          error.message ||
+          "AI не смог обработать фото"
       });
+
     }
 
-    let text = result?.choices?.[0]?.message?.content || "";
-
-    text = text.trim();
-
-    if (text.startsWith("```")) {
-      text = text.replace(/^```(?:json)?\s*/i, "");
-      text = text.replace(/\s*```\s*$/i, "");
-    }
-
-    const firstBrace = text.indexOf("{");
-    const lastBrace = text.lastIndexOf("}");
-
-    if (firstBrace === -1 || lastBrace === -1) {
-      throw new Error("AI не вернул JSON");
-    }
-
-    text = text.slice(firstBrace, lastBrace + 1);
-
-    const data = JSON.parse(text);
-
-    res.json(data);
-
-  } catch (error) {
-    console.error("FoodLens error:", error);
-
-    res.status(500).json({
-      error: error.message || "AI не смог обработать фото"
-    });
   }
-});
+);
 
-// Проверка сервера
+/* =========================
+   ПРОВЕРКА СЕРВЕРА
+========================= */
+
 app.get("/api/health", (req, res) => {
+
   res.json({
     ok: true
   });
+
 });
 
-const PORT = process.env.PORT || 3000;
+/* =========================
+   ЗАПУСК СЕРВЕРА
+========================= */
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log("FoodLens running on port " + PORT);
-});
+const PORT =
+  process.env.PORT || 3000;
+
+app.listen(
+  PORT,
+  "0.0.0.0",
+  () => {
+
+    console.log(
+      "FoodLens running on port " +
+      PORT
+    );
+
+  }
+);
