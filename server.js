@@ -25,6 +25,14 @@ const upload = multer({
 
 app.use(express.json());
 
+pool.query("SELECT NOW()")
+  .then(() => {
+    console.log("PostgreSQL connected");
+  })
+  .catch((error) => {
+    console.error("PostgreSQL connection error:", error);
+  });
+
 // Раздаём файлы сайта
 app.use(express.static(__dirname));
 
